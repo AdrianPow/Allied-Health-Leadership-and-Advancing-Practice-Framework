@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html lang="en-AU"> <!-- FIX A10: AU spelling and en-AU dates -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allied Health Leadership and Advancing Practice Framework — Self-Assessment Tool</title>
+<meta name="description" content="Interactive self-assessment tool for the Queensland Health Allied Health Leadership and Advancing Practice Framework 2022.">
+<style>
+/* ============================================================
+   1. DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Framework navy, sampled from the published capability compass */
+  --navy:        #051180;
+  --navy-mid:    #1c2a9e;
+  --navy-light:  #a8b2e8;
+  --ink:         #1c2233;
+  --ink-soft:    #4c556b;
+  --bg:          #f5f6fb;
+  --card:        #ffffff;
+  --line:        #dde1ee;
+  --focus:       #ffb800;
+
+  /* Official domain colours from the capability compass */
+  --d-clinical:    #FE65C4;
+  --d-person:      #FDBC59;
+  --d-management:  #3AB5FE;
+  --d-learning:    #8B52FE;
+  --d-governance:  #7ED858;
+  --d-data:        #FE5756;
+
+  --radius: 8px;
+  --shadow: 0 2px 10px rgba(5, 17, 128, 0.10);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  /* FIX R16: fluid gutters let widescreen layouts use the available viewport width. */
+  --page-gutter: clamp(24px, 3vw, 96px);
+  /* FIX D1: cap the content. R16's multi-column layouts are how wide screens earn
+     their space; unbounded lines are not. Measured before this: 212 characters per
+     line at 1920px and 296 at 2560px, against a comfortable 45-75. */
+  --page-max: 1400px;
+  /* FIX D3: reading measure for prose blocks. `ch` is the width of "0", which runs
+     wider than average lowercase, so 68ch lands near 80 rendered characters. */
+  --measure: 68ch;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+/* FIX P3: honour the OS reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  /* FIX R07: component transition overrides live after the component declarations. */
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  font-size: 16px;
+  /* FIX R17: prefer normal word boundaries; break an overlong URL/token rather than overflow.
+     FIX R20: `break-word`, not `anywhere`. Both break an overlong token that would
+     overflow, but `anywhere` also lets min-content shrink to a single character, so any
+     element with a narrow declared width splits ordinary words ("Rating" -> "Ratin/g" in
+     the 70px rating column). Containers that genuinely need `anywhere` to shrink inside a
+     grid or flex track still set it individually below. */
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+h1, h2, h3, h4 { color: var(--navy); line-height: 1.3; }
+button { font-family: inherit; }
+:focus-visible {
+  /* FIX A5: navy ring with a white gap reads on both white cards and navy buttons */
+  outline: 3px solid var(--navy); outline-offset: 2px; box-shadow: 0 0 0 2px #fff;
+}
+[hidden] { display: none !important; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip: rect(0 0 0 0); overflow: hidden; white-space: nowrap;
+}
+
+/* ============================================================
+   2. HEADER / BANNER
+   ============================================================ */
+.site-header { background: #fff; border-bottom: 1px solid var(--line); }
+.site-header-inner {
+  /* FIX R16: align branding with the fluid banner and content instead of a 1100px cap. */
+  max-width: var(--page-max); margin: 0 auto; padding: 14px var(--page-gutter); /* FIX D1 */
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.gov-mark { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; min-width: 0; }
+/* FIX R14: restore the supplied government logo with the original responsive sizing. */
+.gov-logo { height: 52px; width: auto; }
+.gov-divider { width: 2px; height: 40px; background: var(--navy-light); flex-shrink: 0; }
+/* FIX R17: allow organisation text to wrap at high zoom as well as on mobile. */
+.gov-agency { color: var(--navy); font-size: 1.15rem; font-weight: 700; white-space: normal; }
+.header-spacer { flex: 1; }
+
+@media (max-width: 560px) {
+  .site-header-inner { padding: 12px 16px; gap: 12px; }
+  .gov-mark { gap: 12px; }
+  .gov-logo { height: 38px; } /* FIX R14: retain the compact mobile logo. */
+  .gov-divider { display: none; }
+  .gov-agency { font-size: 1rem; white-space: normal; }
+}
+
+.banner-stripe {
+  height: 5px;
+  background: linear-gradient(90deg,
+    var(--d-learning), var(--d-management), var(--d-data),
+    var(--d-clinical), var(--d-person), var(--d-governance));
+}
+.title-banner { background: var(--navy); color: #fff; }
+/* FIX R16: use the same responsive gutters as the header and main content. */
+.title-banner-inner { max-width: var(--page-max); margin: 0 auto; padding: 22px var(--page-gutter); } /* FIX D1 */
+.title-banner h1 {
+  color: #fff; font-size: clamp(1.15rem, 2.6vw, 1.6rem); margin: 0; font-weight: 700;
+}
+.title-banner p { margin: 6px 0 0; color: #c9d0f2; font-size: 0.95rem; }
+/* FIX R15: keep the organisation link legible on the navy banner and in print. */
+.title-banner p a { color: inherit; text-decoration: underline; }
+
+/* ============================================================
+   3. LAYOUT
+   ============================================================ */
+/* FIX R16: fill the screen width while retaining gutters and the existing mobile overrides. */
+main { max-width: var(--page-max); margin: 0 auto; padding: 28px var(--page-gutter) 80px; } /* FIX D1 */
+@media (max-width: 560px) {
+  main { padding: 20px 16px 60px; }
+  /* FIX R07: match the card rule specificity without losing to its later declaration. */
+  main .card { padding: 18px 16px; }
+  .title-banner-inner { padding: 18px 16px; }
+}
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px; margin-bottom: 22px;
+}
+.card > :first-child { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+.lead { color: var(--ink-soft); }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 780px) { .split { grid-template-columns: 1fr; gap: 18px; } }
+
+/* ============================================================
+   4. BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--navy); color: #fff; border: 1px solid transparent;
+  border-radius: var(--radius); padding: 11px 20px;
+  font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none;
+}
+.btn:hover { background: var(--navy-mid); }
+.btn-lg { padding: 14px 30px; font-size: 1.05rem; }
+.btn-secondary { background: #fff; color: var(--navy); border-color: var(--navy); }
+.btn-secondary:hover { background: #eef0fb; }
+.btn-quiet {
+  background: transparent; color: var(--navy); border-color: var(--line); font-weight: 600;
+}
+.btn-quiet:hover { background: #eef0fb; }
+.btn-danger { background: #fff; color: #b3261e; border-color: #b3261e; }
+.btn-danger:hover { background: #fdeceb; }
+.btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+/* ============================================================
+   5. TABLES
+   ============================================================ */
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: #eef0fb; color: var(--navy); font-weight: 700; }
+td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* FIX R19: a positioned ancestor so absolutely positioned descendants (the
+   visually-hidden "Remove" label in the plan header) are clipped by this
+   wrapper. Without it that label escapes the scroll container and widens the
+   page — visible as a horizontal scrollbar on phones once R07 gave the plan
+   table a 720px min-width. */
+.table-wrap { overflow-x: auto; position: relative; }
+
+/* ============================================================
+   6. DECISION TREE (stage selector)
+   ============================================================ */
+.tree-step { max-width: 640px; }
+.tree-q {
+  font-size: 1.12rem; font-weight: 600; color: var(--ink);
+  background: #eef0fb; border-left: 5px solid var(--navy);
+  border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 18px; margin-bottom: 18px;
+}
+.tree-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.tree-progress { color: var(--ink-soft); font-size: .9rem; margin-bottom: 10px; }
+
+.stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 14px; }
+.stage-card {
+  text-align: left; background: #fff; border: 2px solid var(--line);
+  border-radius: var(--radius); padding: 16px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.stage-card:hover { border-color: var(--navy); background: #f7f8fe; }
+.stage-card.suggested { border-color: var(--navy); background: #eef0fb; } /* FIX A6 */
+.stage-card .sc-num {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: #fff;
+  display: grid; place-items: center; font-weight: 700; font-size: .9rem;
+}
+.stage-card .sc-title { font-weight: 700; color: var(--navy); font-size: 1.05rem; }
+.stage-card .sc-role { font-size: .85rem; color: var(--ink-soft); }
+.stage-card .sc-desc { font-size: .88rem; color: var(--ink-soft); }
+
+.stage-banner {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #eef0fb; border: 1px solid var(--navy-light);
+  border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px;
+}
+.stage-banner .sb-label { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+.stage-banner .sb-name { font-weight: 700; color: var(--navy); font-size: 1.1rem; }
+
+/* ============================================================
+   7. ASSESSMENT
+   ============================================================ */
+.domain-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.domain-tab {
+  background: #fff; border: 1px solid var(--line); border-bottom: 3px solid var(--domain-color, var(--line));
+  border-radius: var(--radius); padding: 9px 14px; cursor: pointer;
+  font-size: .92rem; font-weight: 600; color: var(--ink-soft);
+  display: flex; align-items: center; gap: 8px;
+}
+.domain-tab:hover { background: #f7f8fe; }
+.domain-tab[aria-selected="true"] { color: var(--navy); background: #eef0fb; border-color: var(--navy-light); border-bottom-color: var(--domain-color); }
+.tab-count { font-size: .8rem; color: var(--ink-soft); font-weight: 500; font-variant-numeric: tabular-nums; }
+.domain-tab.complete .tab-count { color: #2e7d32; font-weight: 700; }
+
+.progress-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: .92rem; color: var(--ink-soft); margin-bottom: 8px; }
+.progress { height: 8px; background: #e4e7f5; border-radius: 999px; overflow: hidden; margin-bottom: 20px; }
+.progress-fill { height: 100%; background: var(--navy); width: 0; transition: width .25s ease; }
+.save-flash { color: #2e7d32; font-weight: 600; opacity: 0; transition: opacity .3s; }
+.save-flash.on { opacity: 1; }
+
+.domain-head { border-left: 5px solid var(--domain-color); padding-left: 14px; margin-bottom: 18px; }
+.domain-head h2 { margin: 0 0 4px; font-size: 1.2rem; }
+.domain-head p { margin: 0; color: var(--ink-soft); font-size: .93rem; }
+
+.q-item {
+  border: 1px solid var(--line); border-left: 4px solid transparent;
+  border-radius: var(--radius); padding: 16px; margin-bottom: 14px; background: #fff;
+}
+.q-item.answered { border-left-color: var(--domain-color); background: #fcfdff; }
+.q-item fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.q-item legend { padding: 0; display: block; width: 100%; margin: 0 0 12px; } /* FIX A1: visible legend */
+.q-text { font-weight: 600; margin: 0; display: flex; gap: 10px; }
+.q-num { color: var(--domain-ink); font-weight: 700; flex-shrink: 0; } /* FIX A4: no brightness filter */
+
+/* FIX U1: tiles carry only the number and short label; the full descriptors live once in the rating guide */
+/* FIX R17: rating labels must be allowed to shrink and wrap inside their grid tracks. */
+.scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.scale label {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 9px 4px 8px; border: 1px solid var(--line); border-radius: var(--radius);
+  cursor: pointer; text-align: center; color: var(--ink-soft); line-height: 1.25;
+}
+.scale label:hover { background: #f7f8fe; border-color: var(--navy-light); }
+.scale label:focus-within { outline: 3px solid var(--navy); outline-offset: 2px; } /* FIX A8 */
+.scale label.selected { border-color: var(--navy); background: #eef0fb; }         /* FIX X1: class instead of :has() */
+.scale label.selected .sc-n, .scale label.selected .sc-l { color: var(--navy); }
+.scale input { margin: 0; accent-color: var(--navy); width: 18px; height: 18px; }
+.sc-n { font-weight: 700; font-size: .95rem; }
+.sc-l { font-size: .78rem; }
+@media (max-width: 640px) {
+  .scale { grid-template-columns: 1fr; }
+  .scale label { flex-direction: row; justify-content: flex-start; gap: 12px; text-align: left; padding: 8px 12px; }
+  .sc-l { font-size: .9rem; }
+}
+
+/* FIX U1: rating guide, shown once above the domain panels */
+.scale-key {
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 6px 16px; margin-bottom: 18px;
+}
+.scale-key summary {
+  cursor: pointer; font-weight: 700; color: var(--navy); padding: 6px 0; list-style: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.scale-key summary::-webkit-details-marker { display: none; }
+.scale-key summary::before { content: "\25B8"; font-size: .8rem; transition: transform .15s; }
+.scale-key[open] summary::before { transform: rotate(90deg); }
+.scale-key summary .footnote { font-weight: 400; }
+.scale-key table { font-size: .88rem; margin: 4px 0 8px; }
+.scale-key td, .scale-key th { padding: 6px 10px; }
+.scale-key td.num { color: var(--navy); font-weight: 700; }
+@media (max-width: 640px) { .scale-key .sk-label { display: none; } .scale-key td:first-child { white-space: nowrap; } }
+
+.note-toggle {
+  margin-top: 10px; background: none; border: none; padding: 0;
+  color: var(--navy); font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline;
+}
+.note-box { margin-top: 10px; }
+.note-box label { display: block; font-size: .82rem; color: var(--ink-soft); margin-bottom: 4px; font-weight: 600; }
+.note-box textarea {
+  width: 100%; min-height: 62px; padding: 8px 10px; font-family: inherit; font-size: .9rem;
+  border: 1px solid var(--line); border-radius: var(--radius); resize: vertical; color: var(--ink);
+}
+.q-item.has-note .note-toggle::after { content: " \2713"; color: #2e7d32; }
+
+.panel-nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+/* ============================================================
+   8. REPORT
+   ============================================================ */
+.report-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 18px; }
+.report-date { color: var(--ink-soft); font-size: .93rem; margin-top: 0; }
+
+.domain-dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 8px; vertical-align: baseline; }
+/* FIX R21: keep the dot beside its label. As plain inline content a long
+   single-word domain ("Management") wrapped entirely to the next line and left
+   the dot stranded on its own. As a flex pair the dot stays on the first line
+   and only the text wraps. */
+.domain-label { display: flex; align-items: baseline; gap: 8px; }
+.domain-label > .domain-dot { margin-right: 0; flex-shrink: 0; }
+.domain-label > span { min-width: 0; }
+.tier-badge { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: .82rem; font-weight: 700; white-space: nowrap; }
+.tier-low  { background: #fdecea; color: #b3261e; }
+.tier-mid  { background: #fff4e0; color: #8a5a00; }
+.tier-high { background: #e7f4e9; color: #1e6b2b; }
+.tier-none { background: #eef0f4; color: #5a6474; }
+
+.compass-wrap { display: grid; place-items: center; }
+.compass-legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; font-size: .86rem; color: var(--ink-soft); margin-top: 10px; }
+.compass-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend-swatch { width: 22px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.feedback-card { border-left: 5px solid var(--domain-color); }
+.feedback-card h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.score-chip {
+  font-size: .82rem; font-weight: 600; color: var(--ink-soft);
+  background: #eef0f4; border-radius: 999px; padding: 3px 11px;
+}
+.fb-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-top: 14px; } /* FIX X3 */
+@media (max-width: 760px) { .fb-grid { grid-template-columns: 1fr; } }
+.fb-col h4 { margin: 0 0 8px; font-size: .92rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); }
+.fb-col ul { margin: 0; padding-left: 20px; }
+.fb-col li { margin-bottom: 7px; }
+.fb-next { background: #f7f8fe; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+
+.priority-flag {
+  display: inline-block; background: var(--navy); color: #fff; font-size: .74rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  border-radius: 999px; padding: 2px 10px; vertical-align: middle;
+}
+
+/* ============================================================
+   9. LEARNING PLAN
+   ============================================================ */
+.wilp-table textarea {
+  width: 100%; min-height: 54px; border: 1px solid var(--line); border-radius: 6px;
+  padding: 7px 9px; font-family: inherit; font-size: .9rem; resize: vertical; color: var(--ink);
+}
+.wilp-table td { vertical-align: top; }
+.print-text { display: none; } /* FIX X5: print-only mirror of each plan field */
+/* FIX R07: these selectors must override the component textarea font sizes. */
+@media screen and (max-width: 640px) {
+  .note-box textarea, .wilp-table textarea { font-size: 16px; }
+  .stage-grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* FIX R07: keep plan fields usable on narrow screens; the wrapper scrolls. */
+@media screen { .wilp-table { min-width: 720px; } }
+/* FIX R08: a td must retain table-cell layout for aligned borders and row heights. */
+.wilp-done { text-align: center; }
+/* FIX R12: retain note line breaks and wrap long unbroken text. */
+.note-summary-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* FIX R04: save failures remain visible until saving succeeds. */
+.storage-warning { border: 1px solid #b3261e; background: #fdecea; color: #81201b; padding: 12px 16px; }
+/* FIX R07: long feedback messages must remain within a narrow viewport. */
+.toast { width: max-content; max-width: calc(100% - 32px); overflow-wrap: anywhere; }
+.wilp-done input { width: 20px; height: 20px; accent-color: var(--navy); }
+.wilp-del {
+  background: none; border: none; color: #b3261e; cursor: pointer;
+  font-size: 1.1rem; line-height: 1; padding: 6px;
+}
+
+/* ============================================================
+   10. MISC
+   ============================================================ */
+.resume-note {
+  background: #fff8e6; border: 1px solid #f0d48a; border-radius: var(--radius);
+  padding: 12px 16px; margin-top: 16px; font-size: .92rem;
+}
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(120%);
+  background: var(--ink); color: #fff; padding: 12px 22px; border-radius: 999px;
+  font-size: .92rem; box-shadow: 0 6px 22px rgba(0,0,0,.25); transition: transform .3s ease; z-index: 50;
+}
+.toast.on { transform: translateX(-50%) translateY(0); }
+.footnote { font-size: .85rem; color: var(--ink-soft); }
+.footnote a { color: var(--navy); }
+
+/* FIX R17: a grid/flex child's intrinsic text width must not push into its neighbour.
+   Keep content visible and wrap it; do not conceal overflow at the page or card level. */
+.split > *, .fb-grid > *, .stage-grid > *, .domain-panel > .card > *,
+#feedback-cards > *, .site-header-inner > *, .gov-mark > *, .stage-banner > *,
+.btn-row > *, .tree-actions > *, .panel-nav > *, .report-actions > *,
+.progress-row > *, .domain-tab > *, .feedback-card h3 > *, .scale label,
+.scale-key summary > *, .q-text > span:last-child, .compass-legend > span {
+  min-width: 0;
+  max-width: 100%;
+}
+/* FIX R17: wrap long action labels without shrinking controls or clipping text. */
+.btn, .note-toggle, .domain-tab, .stage-card {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+/* FIX R20: a band pill is a single short word, so it must not wrap inside itself
+   ("Progres/sing"). Keeping it nowrap also makes its width the column's min-content,
+   so the Band column claims the space it needs and the Domain column wraps instead. */
+.tier-badge { max-width: 100%; white-space: nowrap; }
+.scale input, .q-num, .legend-swatch, .tab-count { flex-shrink: 0; }
+.scale-key summary { flex-wrap: wrap; }
+/* FIX R17: preserve explicit user line breaks and contain long pasted strings in plan fields. */
+.note-box textarea, .wilp-table textarea {
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* FIX D3: hold long prose to a readable measure. Harmless where the container is
+   already narrower than the measure, so no breakpoint is needed. */
+.domain-head p, #supervisor-lead, #progression-note,
+.feedback-card > .lead, .card > .lead, .ref-card p { max-width: var(--measure); }
+
+/* FIX D4: the rating scale's longest cell is 55 characters, so a full-bleed table
+   left it sitting in a box mostly full of air. */
+.scale-table { max-width: 900px; }
+
+/* FIX R17: keep step titles and descriptions distinct, with predictable list indentation. */
+.intro-steps { padding-left: 1.5em; }
+.intro-steps li { padding-left: .15em; margin-bottom: .7em; }
+.intro-steps strong, .intro-steps .step-description { display: block; }
+.intro-steps li:last-child { margin-bottom: 0; }
+/* FIX D2: the six domains and four stages are reference content, not data to scan
+   down a column. As cards each description sits near 60 characters instead of the
+   212 a full-width table cell produced, and wide screens gain columns rather than
+   longer lines. */
+/* FIX D2: both counts are fixed (6 domains, 4 stages), so explicit column counts
+   beat auto-fit — they keep every row full instead of leaving a 4+2 orphan row. */
+.ref-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 660px)  { .ref-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) {
+  .ref-grid-domains { grid-template-columns: repeat(3, minmax(0, 1fr)); } /* 6 = 3 + 3 */
+  .ref-grid-stages  { grid-template-columns: repeat(4, minmax(0, 1fr)); } /* 4 = one row */
+}
+.ref-card {
+  border: 1px solid var(--line); border-left: 4px solid var(--accent, var(--navy));
+  border-radius: var(--radius); padding: 14px 16px; background: #fff;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ref-card h3 { margin: 0; font-size: 1.02rem; color: var(--accent-ink, var(--navy)); }
+.ref-card p { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+.ref-card .ref-meta {
+  font-size: .8rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--ink-soft); font-weight: 700;
+}
+.ref-card .ref-num {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff;
+  display: grid; place-items: center; font-weight: 700; font-size: .82rem; flex-shrink: 0;
+}
+.ref-head { display: flex; align-items: center; gap: 10px; }
+
+/* FIX R18: choose columns from the space in each component, including nested report cards.
+   min(100%, ...) lets each grid fall back to a single column without horizontal overflow. */
+@media screen {
+  .split { grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); }
+  .fb-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+  .stage-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr)); }
+  /* Keep long entries from changing plan-column widths; the existing wrapper scrolls on mobile. */
+  .wilp-table { table-layout: fixed; }
+}
+
+/* FIX R16: use wider screens for useful content rather than oversized text lines.
+   Screen-only rules leave the A4 print layout and smaller-screen stacking intact. */
+@media screen and (min-width: 1100px) {
+  /* FIX R17/D3: constrain reading length inside the column, not the grid item itself. */
+  .intro-copy > p, .intro-copy > ol { max-width: var(--measure); }
+  /* Override the SVG's inline screen-size cap, while preserving its aspect ratio. */
+  #compass-intro-holder svg { max-width: clamp(420px, 30vw, 600px) !important; }
+  #compass-report-holder svg { max-width: clamp(460px, 28vw, 600px) !important; }
+}
+/* FIX R16: show assessment items in two columns when each has adequate reading space.
+   DOM order is unchanged, so keyboard and screen-reader order still follows item numbers. */
+@media screen and (min-width: 1440px) {
+  .domain-panel > .card {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+    align-items: start;
+  }
+  .domain-panel .domain-head, .domain-panel .panel-nav { grid-column: 1 / -1; }
+  .domain-panel .domain-head, .domain-panel .q-item { margin-bottom: 0; }
+  .domain-panel .panel-nav { margin-top: 4px; }
+}
+/* FIX R16: compare domain feedback side by side on wide desktops; stage guidance spans both. */
+@media screen and (min-width: 1600px) {
+  #feedback-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    margin-bottom: 22px;
+    align-items: start;
+  }
+  #feedback-cards > .card { margin-bottom: 0; }
+  #feedback-cards > .card:not(.feedback-card) { grid-column: 1 / -1; }
+}
+
+/* FIX R07: place transition overrides after component rules so reduced motion is honoured. */
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill, .save-flash, .toast, .scale-key summary::before { transition: none; }
+}
+
+/* ============================================================
+   11. PRINT  (FIX X5: rewritten after a real print run showed a blank
+   first page, the toast repeated on every page, and a full-page compass)
+   ============================================================ */
+@page { size: A4; margin: 14mm 12mm; }
+
+@media print {
+  body { background: #fff; font-size: 10.5pt; line-height: 1.45;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; } /* keep badge/dot colours without "background graphics" */
+
+  /* Chrome repeats position:fixed boxes on every page — the toast must not exist in print */
+  .no-print, .site-header, .banner-stripe, .domain-tabs, .progress, .progress-row,
+  .toast, .save-flash, .scale-key { display: none !important; }
+
+  main { max-width: none; padding: 0; }
+  .title-banner { background: #fff; color: var(--navy); border-bottom: 2px solid var(--navy); margin-bottom: 10px; }
+  .title-banner-inner { padding: 0 0 8px; }
+  .title-banner h1 { color: var(--navy); font-size: 15pt; }
+  .title-banner p { color: var(--ink-soft); }
+
+  /* Cards may break across pages; a blanket avoid on tall cards is what produced the blank pages.
+     Only units that are small enough to always fit are kept together. */
+  .card { box-shadow: none; border: 1px solid #c9cdd8; padding: 12px 14px; margin-bottom: 10px; break-inside: auto; }
+  /* FIX R08: long plans and long rows must be allowed to flow across print pages. */
+  .feedback-card, .fb-next, .compass-wrap, .compass-legend, tr { break-inside: avoid; }
+  #wilp-card, .wilp-table tr { break-inside: auto; }
+  .table-wrap { overflow: visible; }
+  .wilp-table { table-layout: fixed; }
+  thead { display: table-header-group; } /* repeat column headings if the plan spans pages */
+  h2, h3, h4 { break-after: avoid; }
+  h2 { font-size: 13pt; } h3 { font-size: 12pt; }
+
+  /* Print width is below the 780px breakpoint, so force the compass and table side by side */
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  .compass-wrap svg { max-width: 290px !important; }
+  .fb-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+
+  table { font-size: 9.5pt; }
+  th, td { padding: 5px 8px; }
+  .wilp-table th, .wilp-table td { padding: 5px 6px; }
+  /* The plan prints from plain text blocks that flow with the page; textareas cannot
+     grow to fit at print width and clipped long entries (FIX X5). */
+  .wilp-table textarea { display: none; }
+  .print-text {
+    display: block; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 44px;
+    border: 1px solid #bbb; border-radius: 4px; padding: 5px 7px; font-size: 9.5pt; line-height: 1.4;
+  }
+  .wilp-done input { width: 14px; height: 14px; }
+
+  a[href]::after { content: ""; }
+  .footnote { font-size: 8.5pt; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header no-print">
+  <div class="site-header-inner">
+    <div class="gov-mark">
+      <!-- FIX R14: show text until the official logo loads; retain it if offline or blocked. -->
+      <img src="https://www.health.qld.gov.au/_qgds-design/images/header-logo-qgov-dark.svg"
+           alt="Queensland Government" class="gov-logo" id="gov-logo" referrerpolicy="no-referrer" hidden>
+      <span class="gov-agency" id="gov-logo-fallback">Queensland Government</span>
+      <div class="gov-divider"></div>
+      <span class="gov-agency">Queensland Health</span>
+    </div>
+    <div class="header-spacer"></div>
+    <button type="button" id="btn-home" class="btn btn-quiet" hidden>&#8592; Back to start</button>
+  </div>
+</header>
+
+<div class="banner-stripe"></div>
+
+<div class="title-banner">
+  <div class="title-banner-inner">
+    <h1>Allied Health Leadership and Advancing Practice Framework</h1>
+    <!-- FIX R15: reflect the organisational location supplied by OCAHO; 2022 is the framework edition. -->
+    <p>Self-assessment tool &middot; <a href="https://www.health.qld.gov.au/ahwac" target="_blank" rel="noopener">Office of the Chief Allied Health Officer</a>
+      &middot; Health Workforce Division &middot; Framework 2022</p>
+  </div>
+</div>
+
+<main>
+<!-- FIX R04: persistent, announced storage feedback is available in every view. -->
+<p id="storage-warning" class="storage-warning no-print" role="status" hidden></p>
+
+<!-- ==========================================================
+     VIEW: INTRO
+     ========================================================== -->
+<section id="view-intro" class="view" aria-label="Introduction and instructions">
+
+  <div class="card">
+    <div class="split">
+      <!-- FIX R17: explicit copy container keeps text wrapping independent of the compass. -->
+      <div class="intro-copy">
+        <h2>About this self-assessment</h2>
+        <!-- FIX R15: link directly to the original framework webpage from the introduction. -->
+        <p>The <a href="https://www.health.qld.gov.au/ahwac/html/allied-health-workforce/leadership" target="_blank" rel="noopener"><strong>Allied Health Leadership and Advancing Practice Framework</strong></a> helps you reflect on
+        the clinical and non-clinical capabilities you need to advance your practice and your leadership.
+        It describes how allied health professionals progressively expand their <em>sphere of influence</em> —
+        from leading themselves, to leading others, to leading innovations, to leading systems.</p>
+
+        <p>This tool walks you through the framework's assessment process:</p>
+        <!-- FIX R17: separate titles from descriptions instead of wrapping a long combined line. -->
+        <ol class="intro-steps">
+          <li><strong>Framework Assessment Tree</strong><span class="step-description">A few short questions to identify which stage you are working within.</span></li>
+          <li><strong>Self-reflection</strong><span class="step-description">Rate how strongly you agree with each statement for that stage.</span></li>
+          <li><strong>Capability Compass</strong><span class="step-description">See your average score in each of the six domains plotted visually.</span></li>
+          <li><strong>Supervisor review</strong><span class="step-description">Discuss your results, strengths and development areas with your supervisor.</span></li>
+          <li><strong>Work-Integrated Learning Plan</strong><span class="step-description">Record the development activities you will pursue.</span></li>
+        </ol>
+
+        <p class="footnote"><strong>Scores are not performance indicators.</strong> This is a reflective tool
+        to help you and your supervisor identify strengths and target areas for development. Your answers stay
+        in this browser — the app does not transmit your answers, notes or learning plan.
+        <!-- FIX R10: explain the persistence and access boundary of local storage. -->
+        Progress is saved on this browser profile until you discard it or clear browser data.
+        Other people using the same profile may be able to access it.
+        <!-- FIX R14: the optional logo request does not contain assessment data. -->
+        The government logo loads from Queensland Health when available. Opening a source link leaves this app.</p>
+      </div>
+      <div>
+        <figure style="margin:0">
+          <div id="compass-intro-holder"></div>
+          <figcaption class="footnote" style="text-align:center;margin-top:8px">
+            The Capability Compass: six domains (outer ring) across four stages of expanding influence (inner circles).
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The six domains</h2>
+    <p class="lead">Leadership, research and communication are embedded within each of the six domains.</p>
+    <ul class="ref-grid ref-grid-domains" id="domain-grid"></ul> <!-- FIX D2 -->
+  </div>
+
+  <div class="card">
+    <h2>The four stages</h2>
+    <p class="lead">Each stage builds on the previous one. The stages are <strong>not</strong> aligned to health
+    practitioner (HP) levels — you do not need to be in a high-level role to progress through the framework.</p>
+    <ul class="ref-grid ref-grid-stages" id="stage-grid-intro"></ul> <!-- FIX D2 -->
+  </div>
+
+  <div class="card">
+    <h2>The rating scale</h2>
+    <p class="lead">Each statement is rated from 1 to 5.</p>
+    <div class="table-wrap">
+      <table class="scale-table">
+        <thead><tr><th scope="col" style="width:70px">Rating</th><th scope="col" style="width:200px">Description</th><th scope="col">Choose this rating if&hellip;</th></tr></thead>
+        <tbody id="scale-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <button type="button" class="btn btn-lg" id="btn-start">Start the Framework Assessment Tree &rarr;</button>
+    <p class="lead" style="margin-bottom:0"><span id="intro-count"></span> &middot; about 10&ndash;15 minutes</p> <!-- FIX M6 -->
+    <div class="resume-note" id="resume-note" hidden>
+      You have saved progress for <strong><span id="resume-stage"></span></strong>
+      (<span id="resume-count"></span> answered).
+      <div class="btn-row" style="margin-top:10px;justify-content:center">
+        <button type="button" class="btn btn-secondary" id="btn-resume">Resume</button>
+        <button type="button" class="btn btn-danger" id="btn-clear-saved">Discard &amp; restart</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================
+     VIEW: STAGE SELECTION (assessment tree)
+     ========================================================== -->
+<section id="view-tree" class="view" aria-label="Framework assessment tree" hidden>
+  <div class="card">
+    <h2>Framework Assessment Tree</h2>
+    <p class="lead">Answer these questions to identify the stage of the framework you are currently working within.</p>
+    <div class="tree-step">
+      <p class="tree-progress" id="tree-progress" aria-live="polite"></p>
+      <div class="tree-q" id="tree-question" tabindex="-1"></div> <!-- FIX A3: receives focus after each answer -->
+      <div class="tree-actions" id="tree-actions"></div>
+    </div>
+    <p class="footnote" style="margin-top:22px">
+      Prefer to choose yourself? <button type="button" class="note-toggle" id="btn-skip-tree">Skip the tree and pick a stage directly</button>
+    </p>
+  </div>
+
+  <div class="card" id="stage-picker" hidden>
+    <h2 id="stage-picker-title" tabindex="-1">Choose your stage</h2> <!-- FIX A3 -->
+    <p class="lead" id="stage-picker-lead">Select the stage that best describes where you are working now.</p>
+    <div class="stage-grid" id="stage-grid"></div>
+    <p class="footnote" style="margin-top:18px">
+      If after completing the questions you think you should be in a different stage, you may change stage with
+      the consent of your supervisor.
+    </p>
+  </div>
+</section>
+
+<!-- ==========================================================
+     VIEW: ASSESSMENT
+     ========================================================== -->
+<section id="view-assess" class="view" aria-label="Self-reflection questions" hidden>
+  <div class="stage-banner no-print">
+    <div>
+      <div class="sb-label">Assessing</div>
+      <div class="sb-name" id="assess-stage-name"></div>
+    </div>
+    <div class="header-spacer"></div>
+    <button type="button" class="btn btn-quiet" id="btn-change-stage">Change stage</button>
+  </div>
+
+  <div class="domain-tabs" role="tablist" aria-label="Assessment domains" id="domain-tabs"></div>
+
+  <div class="progress-row">
+    <span><strong id="progress-count">0</strong> of <span id="progress-total">19</span> statements answered</span>
+    <!-- FIX R04: update live-region text when a save actually succeeds. -->
+    <span class="save-flash" id="save-flash" role="status"></span>
+  </div>
+  <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+       aria-valuenow="0" aria-label="Overall progress" id="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- FIX U1: descriptors appear here once instead of on all 95 tiles -->
+  <details class="scale-key" id="scale-key" open>
+    <summary>Rating guide <span class="footnote">&mdash; what each score means</span></summary>
+    <div class="table-wrap">
+      <table class="scale-table">
+        <thead><tr><th scope="col" style="width:60px">Score</th><th scope="col" class="sk-label" style="width:180px">Description</th><th scope="col">Choose this score if&hellip;</th></tr></thead>
+        <tbody id="scale-key-body"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <div id="domain-panels"></div>
+</section>
+
+<!-- ==========================================================
+     VIEW: REPORT
+     ========================================================== -->
+<section id="view-report" class="view" aria-label="Your capability compass report" hidden>
+  <div class="report-actions no-print">
+    <button type="button" class="btn btn-danger" id="btn-start-over">Start over</button>
+    <div class="header-spacer"></div>
+    <button type="button" class="btn btn-secondary" id="btn-edit-answers">&#8592; Edit answers</button>
+    <button type="button" class="btn" id="btn-print">Print / Save PDF</button>
+  </div>
+
+  <div class="card">
+    <h2>Your Capability Compass</h2>
+    <p class="report-date" id="report-date"></p>
+    <div class="split">
+      <div>
+        <div class="compass-wrap" id="compass-report-holder"></div>
+        <div class="compass-legend">
+          <span><i class="legend-swatch" style="background:rgba(5,17,128,.35);border:1.5px solid #051180"></i> Your current capability</span>
+          <span><i class="legend-swatch" style="background:transparent;border:1.5px dashed #8a93b8"></i> A score of 5 in every domain</span>
+        </div>
+      </div>
+      <div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Domain</th><th scope="col" class="num">Average</th><th scope="col">Band</th></tr></thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <!-- FIX R09: progression advice is rendered for the current stage. -->
+        <p class="footnote" id="progression-note" style="margin-top:14px"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What to discuss with your supervisor</h2>
+    <p class="lead" id="supervisor-lead"></p>
+    <div id="notes-summary"></div>
+  </div>
+
+  <div id="feedback-cards"></div>
+
+  <div class="card" id="wilp-card">
+    <h2>Work-Integrated Learning Plan</h2>
+    <p class="lead">Plan activities to develop the capability areas identified for improvement. Discuss this plan
+    with your supervisor and update it as activities are completed.</p>
+    <div class="table-wrap">
+      <table class="wilp-table">
+        <thead>
+          <tr>
+            <th scope="col" style="width:22%">Identified development need</th>
+            <th scope="col" style="width:30%">Potential activities</th>
+            <th scope="col" style="width:80px">Done?</th>
+            <th scope="col">Has this activity helped you meet the development objective? How?</th>
+            <th scope="col" class="no-print" style="width:44px"><span class="visually-hidden">Remove</span></th>
+          </tr>
+        </thead>
+        <tbody id="wilp-body"></tbody>
+      </table>
+    </div>
+    <div class="btn-row no-print" style="margin-top:14px">
+      <button type="button" class="btn btn-secondary" id="btn-add-wilp">+ Add a row</button>
+    </div>
+  </div>
+
+  <p class="footnote">
+    <!-- FIX R15: retain the original attribution and make its framework source directly accessible. -->
+    Source: <a href="https://www.health.qld.gov.au/ahwac/html/allied-health-workforce/leadership" target="_blank" rel="noopener"><em>Allied Health Leadership and Advancing Practice Framework 2022</em></a>, State of Queensland
+    (Queensland Health), prepared by the Australian Healthcare and Hospitals Association.
+    Licensed under <a href="https://creativecommons.org/licenses/by/3.0/au/" target="_blank" rel="noopener">CC BY 3.0 AU</a>.
+  </p>
+</section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* ================================================================
+   DATA
+   All content below is transcribed from the Allied Health Leadership
+   and Advancing Practice Framework 2022 and its Assessment Pack
+   (State of Queensland / Queensland Health, CC BY 3.0 AU).
+   ================================================================ */
+
+// FIX R15: feedback links lead to the framework itself rather than the general office homepage.
+const FRAMEWORK_URL = 'https://www.health.qld.gov.au/ahwac/html/allied-health-workforce/leadership';
+
+/* 5-point Likert scale, from the Assessment Tool rating table. */
+const SCALE = [ // FIX M5: `guide` replaces the awkward `if` property
+  { value: 1, label: 'Disagree',          guide: 'I am inexperienced in demonstrating this' },
+  { value: 2, label: 'Somewhat disagree', guide: 'I have demonstrated this once or twice, but need to get better' },
+  { value: 3, label: 'Neutral',           guide: 'I have demonstrated this competently, but need more experience' },
+  { value: 4, label: 'Somewhat agree',    guide: 'I demonstrate this most of the time' },
+  { value: 5, label: 'Agree',             guide: 'I always demonstrate this competently and effectively' }
+];
+
+/* FIX M1: tunables that were previously magic numbers scattered through the code. */
+const CONFIG = {
+  band: { lowBelow: 2.5, highAbove: 4 },   // domain average -> Developing / Progressing / Established
+  focus: { maxDomains: 3, minSpread: 0.5 }, // how "focus areas" are chosen for the supervisor conversation
+  saveDebounceMs: 500,
+  saveFlashMs: 1400,
+  toastMs: 2600
+};
+
+/* The four stages (milestones / spheres of influence). */
+const STAGES = [
+  {
+    id: 'self', num: 1, title: 'Leads self', short: 'self',
+    role: 'New starter',
+    focus: 'Self development',
+    sphere: 'Demonstrates self-awareness, strength of character, key knowledge and understandings, and undertakes personal development.',
+    treeDesc: 'You are in your early career, or in a role where you are learning to apply your knowledge and skills to perform your duties to a high standard.',
+    training: [
+      'Work-integrated learning accommodated alongside new role responsibilities.',
+      'A focus on diversity awareness, interpersonal skills, professional ethics and behaviour, and basic competencies in data and technological systems.'
+    ]
+  },
+  {
+    id: 'others', num: 2, title: 'Leads others', short: 'others',
+    role: 'Developing',
+    focus: 'Working with people and teams',
+    sphere: 'Communicates honestly and respectfully, applies the values of diversity, supports consumers, colleagues and others.',
+    treeDesc: 'You have developed in your role, and have a good grasp of your role requirements. You are now expanding your skills to better support, engage and lead your team and colleagues.',
+    training: [
+      'Work-integrated learning.',
+      'Supervision and professional networking.',
+      'Lower-level leadership and management training.',
+      'A focus on communication, teamwork and network building.'
+    ]
+  },
+  {
+    id: 'innovations', num: 3, title: 'Leads innovations', short: 'innovations',
+    role: 'Experienced',
+    focus: 'Improvement of services and care outcomes',
+    sphere: 'Measures, develops and promotes innovation and improvement to achieve outcomes, evaluates progress and leads change.',
+    treeDesc: 'You are very experienced in your role and have taken advances in your career that have allowed you to lead significant service improvements and innovation.',
+    training: [
+      'Self-identified development.',
+      'Research or formal education, in addition to work-integrated learning.',
+      'Networking with, and mentorship across, disciplines and by people within your service.',
+      'Leadership, management and service delivery design, delivery and innovation training opportunities.'
+    ]
+  },
+  {
+    id: 'systems', num: 4, title: 'Leads systems', short: 'systems',
+    role: 'Advanced',
+    focus: 'Inter-organisational thinking and strategic engagement',
+    sphere: 'Leads systemic development and change, leverages external partnerships, and involves consumers and communities in policy decision-making and addressing wider health problems.',
+    // FIX R13: distinguish system leadership from the service-improvement focus of Stage 3.
+    treeDesc: 'You lead strategic change across services, organisations or sectors, building external partnerships and influencing policy and system-wide outcomes.',
+    training: [
+      'Self-identified development.',
+      'Research or formal education, and work-integrated learning.',
+      'Networking with, and mentorship by, people outside your service or sector.',
+      'Leadership, strategy, decision-making and policy training opportunities.'
+    ]
+  }
+];
+
+/* The six domains, with the official capability compass colours. */
+const DOMAINS = [
+  {
+    id: 'clinical', num: 1, title: 'Clinical practice', compassLabel: 'clinical practice',
+    color: '#FE65C4', ink: '#B4157A',
+    description: 'The clinical knowledge, skills and abilities for advanced clinical practice in generalist and focussed clinical contexts, as well as profession-specific situations and situations relating to specific client groups or geographical settings.'
+  },
+  {
+    id: 'person', num: 2, title: 'Person-centred', compassLabel: 'person-centred',
+    color: '#FDBC59', ink: '#8A5A00',
+    description: 'Person-centredness is a distinct dimension of high-quality health care. It involves seeking out and understanding what is important to the patient, fostering trust, establishing mutual respect and working together to share decisions and plan care. Considerations of equity and public value highlight the need to embed community and population health in all person-centred approaches.'
+  },
+  {
+    id: 'management', num: 3, title: 'Management', compassLabel: 'management',
+    color: '#3AB5FE', ink: '#0A6E9E',
+    description: 'Management is an essential skill in all workplaces. This capability empowers health professionals to effectively plan, coordinate, control, decide and direct appropriate resources to achieve outcomes.'
+  },
+  {
+    id: 'learning', num: 4, title: 'Learning', compassLabel: 'learning',
+    color: '#8B52FE', ink: '#5A21C9',
+    description: 'Learning refers to the acquisition of skills, knowledge and experience — through formal education, through research endeavours, and through informal knowledge sharing such as mentoring. The capability and commitment to sharing knowledge with other health professionals is pivotal to creating a productive learning culture.'
+  },
+  {
+    id: 'governance', num: 5, title: 'Clinical governance', compassLabel: 'clinical governance',
+    color: '#7ED858', ink: '#3D7A22',
+    description: 'Clinical governance entails the processes, guidelines and actions that create clinical leadership and accountability focused on delivering safe and quality driven health care. It empowers people to participate in the management of their own health and contribute to service design, and employs risk management to identify and design practice improvements.'
+  },
+  {
+    id: 'data', num: 6, title: 'Data and technology', compassLabel: 'data and technology',
+    color: '#FE5756', ink: '#C1272D',
+    description: 'The adaptability and openness of health professionals to new and emerging technologies, and their capability to understand new data and information, is critical to the resilience of the health system. Being digitally, technologically and data enabled fosters innovation and leadership to drive sustainable health care transformation.'
+  }
+];
+
+/* Clockwise order used by the published Capability Compass, starting at 12 o'clock. */
+const COMPASS_ORDER = ['learning', 'management', 'data', 'clinical', 'person', 'governance'];
+
+/* ----------------------------------------------------------------
+   Skills matrix — the capabilities expected of a health professional
+   operating within each stage, for each domain.
+   ---------------------------------------------------------------- */
+const MATRIX = {
+  clinical: {
+    self: [
+      'General knowledge of service-specific clinical practice areas and treatment options.',
+      'Interprets assessment results, informed by clinical reasoning, evidence, and client/patient and service needs, to formulate a diagnosis.',
+      'Conducts comprehensive assessments, using a range of methods and tools informed by theory and evidence, of clients with complex needs or within complex situations.',
+      'Formulates an individualised intervention plan, informed by clinical reasoning and evidence, including referring to other health providers as appropriate.'
+    ],
+    others: [
+      'Recognises the need for, and requests/refers for, investigations and/or assessments, as appropriate and adhering to local policies.',
+      'Communicates effectively and compassionately with patients and carers through all stages of their care journey, making sure they feel empowered and in control of their care options.',
+      'Seeks to promote new and emerging knowledge and evidence on clinical practice amongst colleagues and engages with others to improve their level of clinical practice knowledge.',
+      'Monitors the effectiveness of management plans and treatments, making changes or referring to other health providers as appropriate.'
+    ],
+    innovations: [
+      'Advanced level of clinical knowledge, technical skills and reasoning.',
+      'Demonstrates shared decision-making with a clinical team and with patients.',
+      'Engages in clinical research and evidence to provide innovative approaches to assessment and treatment to achieve better outcomes for clients/patients and the service.',
+      'Creates a positive environment for collaboration amongst colleagues and other clinicians to develop ways to improve patient outcomes.'
+    ],
+    systems: [
+      'Develops, implements, and critically evaluates treatment management plans.',
+      'Promotes, establishes and reviews referral pathways.',
+      'Provides strategic advice and contributes to local, national and international networks relevant to their profession and area of clinical practice.',
+      'Consults with education providers to ensure content and delivery methods are relevant to clinical practice.'
+    ]
+  },
+  person: {
+    self: [
+      'Dedicated to understanding patient and community needs, values, expectations, and context.',
+      'Recognises and addresses own biases.',
+      'Models ethical, responsive, and respectful behaviour to all people, including those of different cultural backgrounds, gender identifications and other diverse groups.'
+    ],
+    others: [
+      'Actively listens and responds to patient and community needs, values, expectations, and context.',
+      'Adapts communication style and messaging to effectively communicate with the audience.',
+      'Leads and supports others to identify the shared needs of patient groups.'
+    ],
+    innovations: [
+      'Leads projects designed to achieve person-centred outcomes by incorporating the interests and needs of patients and communities.',
+      'Explores and establishes a process to measure experiences and outcomes of care (PREMs and PROMs).',
+      'Promotes a person-centred care focus into organisational decision-making and supports staff to apply these principles as part of everyday practice.'
+    ],
+    systems: [
+      'Expands partnerships with other health services and stakeholders to improve outcomes that matter to patients.',
+      'Champions integrated care practices.',
+      'Seeks to address health issues and health care inequity by influencing regulatory, policy and legislative decision-making.'
+    ]
+  },
+  management: {
+    self: [
+      'Demonstrates management skills and knowledge.',
+      'Reviews and analyses current performance and takes action to improve.',
+      'Seeks out opportunities to develop management capabilities, including opportunities to manage projects, tasks, or people.'
+    ],
+    others: [
+      'Establishes and maintains positive relationships with colleagues, patients, and other stakeholders.',
+      'Communicates effectively to managers and executive staff on identified, evaluated, and documented service issues.',
+      'Supports colleagues with their management objectives and service improvement initiatives.'
+    ],
+    innovations: [
+      'Proposes solutions to identified problems or shortcomings with service delivery and care.',
+      'Manages the development, implementation, and evaluation of service or process change.',
+      'Demonstrates knowledge and skills in financial, resource and risk management to improve processes.'
+    ],
+    systems: [
+      'Shapes and supports strategic directions in the management of health services across organisational and professional boundaries.',
+      'Champions sustainability in service delivery, workforce development and the health system.',
+      'Contributes to the efficient and effective use of resources and technologies.'
+    ]
+  },
+  learning: {
+    self: [
+      'Reflects on gaps and limitations in knowledge and skills.',
+      'Consistently seeks out learning and development opportunities, both formal and informal.',
+      'Demonstrates a working knowledge of relevant current research and an ability to undertake research and critically evaluate information.'
+    ],
+    others: [
+      'Seeks feedback from others to identify development needs and offers feedback to colleagues when appropriate.',
+      'Collaboratively participates in skill and knowledge sharing initiatives, mentoring and supervision opportunities.',
+      'Offers appropriate education and advice in relation to clinical and service practices to colleagues, other professionals, and patients.'
+    ],
+    innovations: [
+      'Leads the translation and application of lessons from education and research into service and organisational level practice.',
+      'Identifies, creates, and promotes learning and training opportunities to meet organisational workforce development needs and for service improvement and delivery.',
+      'Creates an environment that facilitates colleagues to improve their consumption of, participation in and generation of, research and evidence.'
+    ],
+    systems: [
+      'Engages in research pursuits on issues impacting health outcomes and the health system.',
+      'Educates and informs decision-making factors on strategic workforce development needs.',
+      'Participates in collaborative and interprofessional/interdisciplinary learning and development opportunities, like professional and community networks, and facilitates the participation of colleagues in these networks.'
+    ]
+  },
+  governance: {
+    self: [
+      'Understands and upholds safety and quality practices, and relevant current national and international guidelines.',
+      'Recognises accountability and responsibility for decisions. Acknowledges mistakes and learns from them.',
+      'Promotes and contributes to a culture of safety and quality of care.'
+    ],
+    others: [
+      'Seeks advice and information from others on safety and quality practices.',
+      'Partners with consumers to empower and support their health care.',
+      'Supports colleagues and clinicians to engage with risk, promote safety and quality practices, and improve consumer outcomes.'
+    ],
+    innovations: [
+      'Oversees and understands consumer outcomes to anticipate and prevent risks and improve processes.',
+      'Confidently makes decisions and recommendations in situations of uncertainty and ambiguity.',
+      'Improves and promotes monitoring, reporting and feedback mechanisms.'
+    ],
+    systems: [
+      'Creatively and strategically engages with risk to develop opportunities for innovative and safe services.',
+      'Contributes to the development and implementation of guidance, protocols and recommendations at a local, state and/or national level.',
+      'Champions system-wide change that is evidence and outcomes-based.'
+    ]
+  },
+  data: {
+    self: [
+      'Understands, utilises, and manages data and technology in the workplace.',
+      'Applies data and digital literacy to improve personal work practices.',
+      'Engages with training and development to improve data and digital literacy.'
+    ],
+    others: [
+      'Raises awareness, educates, and listens to the concerns of patients and communities on available digital health resources.',
+      'Engages with other organisations to promote and explore opportunities for the adoption of data and technology in the workplace.',
+      'Champions compliance with information management principles and proper use of digital systems amongst colleagues.'
+    ],
+    innovations: [
+      'Identifies, researches, and designs technological solutions to health care services that meet patient and community needs.',
+      'Demonstrates an ability to assess, monitor and interpret local clinical data to benchmarks with other facilities, centres or regions.',
+      'Critically evaluates the use of data and technologies to achieve outcomes.'
+    ],
+    systems: [
+      'Contributes to developing, evaluating, and expanding digital models of care and digital health resources.',
+      'Builds data and digital capability within future strategic planning and workforce development.',
+      'Leads digital transformation and the adoption of new and emerging technologies in the health system.'
+    ]
+  }
+};
+
+/* ----------------------------------------------------------------
+   Self-reflection statements: 19 per stage, keyed by stage then domain.
+   Numbering (1.1 … 6.3) follows the published assessment.
+   ---------------------------------------------------------------- */
+const STATEMENTS = {
+  self: {
+    clinical: [
+      'I demonstrate a general knowledge of all service-specific clinical areas/disciplines and treatment options',
+      'I interpret assessment results and formulate a diagnosis informed by clinical reasoning, evidence, and client/patient and service needs',
+      'I use a range of methods and tools informed by theory and evidence to conduct comprehensive assessments of clients with complex needs or within complex situations',
+      'I demonstrate clinical reasoning and use evidence to formulate an individualised intervention plan, including referring to other health providers as appropriate'
+    ],
+    person: [
+      'I am dedicated to understanding the needs, values, expectations, and contexts of my patients and my community',
+      'I recognise and address my own biases',
+      'I behave ethically, responsively, and respectfully to all people'
+    ],
+    management: [
+      'I demonstrate management skills and knowledge',
+      'I review, analyse, and actively improve my performance',
+      'I seek out opportunities to develop management capabilities, including opportunities to manage projects, tasks, or people'
+    ],
+    learning: [
+      'I frequently reflect on my skills and knowledge gaps',
+      'I consistently seek out learning and development opportunities',
+      'I demonstrate knowledge of relevant current research, an ability to undertake research and to critically evaluate information'
+    ],
+    governance: [
+      'I understand and uphold safety and quality practices, and relevant current national and international guidelines',
+      'I recognise when I am accountable and responsible for decision-making, particularly when things go wrong',
+      'I actively promote and contribute to a culture of safety and quality of care'
+    ],
+    data: [
+      'I understand, utilise, and manage data and technology in the workplace',
+      'I apply data and digital literacy to improve my personal work practices',
+      'I engage with training and development to improve my digital and data literacy'
+    ]
+  },
+  others: {
+    clinical: [
+      'I can recognise the need for, and requests/refers for, investigations and/or assessments, as appropriate and adhering to local policies',
+      'I communicate effectively and compassionately with patients and carers through all stages of their care journey, making sure they feel empowered and in control of their care options',
+      'I seek to promote new and emerging knowledge and evidence on clinical practice amongst my colleagues and engage with others to improve their level of clinical practice knowledge',
+      'I monitor the effectiveness of management plans and treatments, making changes or referring to other health providers as appropriate'
+    ],
+    person: [
+      'I treat all people with dignity and respect, and inspire others to do the same',
+      'I adapt communication style and messaging to effectively communicate with my audience',
+      'I lead and support others to identify the shared needs of patient groups'
+    ],
+    management: [
+      'I maintain positive relationships with colleagues, patients, and other stakeholders',
+      'I communicate effectively with senior leaders about concerns or identified service issues',
+      'I support my colleagues to meet their service or management objectives'
+    ],
+    learning: [
+      'I seek feedback from others to identify my development needs',
+      'I participate in knowledge sharing, mentoring or supervision initiatives',
+      'I offer appropriate education and advice in relation to clinical and service practices to colleagues, other professionals, and patients'
+    ],
+    governance: [
+      'I know where and know to seek advice and information from others on safety and quality practices',
+      'I partner with patients to empower and enable them to take opportunities to improve their health',
+      'I support my colleagues to engage with risk, promote safety and quality practices, and improve patient outcomes'
+    ],
+    data: [
+      'I promote and educate patients and communities on the available digital health resources',
+      'I engage with others to explore opportunities for data and technology adoption in the workplace',
+      'I inspire and influence others to comply with information management principles and proper use of digital systems amongst colleagues'
+    ]
+  },
+  innovations: {
+    clinical: [
+      'I demonstrate advanced level of clinical knowledge, technical skills and reasoning',
+      'I demonstrate shared decision-making with a clinical team and with patients',
+      'I engage in clinical research and evidence to provide innovative approaches to assessment and treatment to achieve better outcomes for clients/patients and the service',
+      'I create a positive environment for collaboration amongst colleagues and other clinicians to develop ways to improve patient outcomes'
+    ],
+    person: [
+      'I lead projects designed to achieve person-centred outcomes by incorporating the interests and needs of patients and communities',
+      'I lead others to implement, improve and utilise the measurement of patient experiences and outcomes (PREMs and PROMs)',
+      'I initiate and build momentum for implementing a person-centred care services and system'
+    ],
+    management: [
+      'I monitor for and propose potential solutions to identified service issues or shortcomings',
+      'I effectively manage the development, implementation, and evaluation of service or process change',
+      'I align financial, resource and risk management with goals and evidence to achieve improvements'
+    ],
+    learning: [
+      'I translate and apply learnings from education or research into practice in my service or organisation',
+      'I identify, create, and promote learning and training opportunities to meet organisational workforce development needs and for service improvement and delivery',
+      'I contribute to the creation of an environment that facilitates colleagues to improve their consumption of, participation in and generation of, research and evidence'
+    ],
+    governance: [
+      'I seek to understand patient health outcomes to anticipate risks, and involve patients in achieving change',
+      'I confidently make decisions and recommendations in situations of uncertainty and ambiguity',
+      'I assess, utilise, and improve reporting and feedback mechanisms'
+    ],
+    data: [
+      'I identify, research, and design technological solutions to health care services to meet patient needs',
+      'I assess, monitor and interpret local clinical data to benchmarks with other facilities, centres or regions',
+      'I critically evaluate and celebrate achievements in the use of data and technology to achieve outcomes'
+    ]
+  },
+  systems: {
+    clinical: [
+      'I develop, implement, and critically evaluate treatment management plans',
+      'I promote, establish, and review referral pathways',
+      'I provide strategic advice and contribute to local, national and international networks relevant to my profession and area of clinical practice',
+      'I consult with education providers to ensure content and delivery methods are relevant to clinical practice'
+    ],
+    person: [
+      'I partner with a diverse range of stakeholders to improve outcomes that matter to patients',
+      'I build alliances with different stakeholders based on trust and respect to establish health care connectivity and integration',
+      'I understand and negotiate the complexity and interconnectedness of the health system to address health issues'
+    ],
+    management: [
+      'I recognise, explain and facilitate strategies to effectively manage health services across organisational and professional boundaries',
+      'I influence and encourage informed discussion on the implementation of sustainability in the health system',
+      'I hold myself and others accountable for the efficient and effective use of resources to achieve patient and service outcomes'
+    ],
+    learning: [
+      'I engage in research pursuits to improve health outcomes, policy, education, and training',
+      'I effectively communicate with decision-makers and stakeholders on strategic workforce development needs',
+      'I participate in collaborative and interprofessional/interdisciplinary learning and development opportunities, like professional and community networks, and facilitate the participation of colleagues in these networks'
+    ],
+    governance: [
+      'I creatively and strategically engage with risk to develop opportunities for innovative and safe services',
+      'I contribute to the development and implementation of guidance, protocols and recommendations at a local, state and/or national level',
+      'I collaborate with patients and stakeholders when advocating for system-wide change that is evidence and outcomes-based'
+    ],
+    data: [
+      'I contribute to developing, evaluating, and expanding digital models of care and digital health resources',
+      'I incorporate data and digital capabilities in strategic planning and workforce development',
+      'I lead others in digital transformation, inspiring and celebrating the adoption of new and emerging technologies in the health system'
+    ]
+  }
+};
+
+/* ----------------------------------------------------------------
+   Framework Assessment Tree, adapted from the framework stage descriptions.
+   FIX R13: each node asks the user to
+   confirm a description, or say they have advanced beyond it.
+   ---------------------------------------------------------------- */
+const TREE = [
+  {
+    desc: STAGES[0].treeDesc,
+    yes: { label: 'Yes',                          stage: 'self' },
+    no:  { label: 'I have advanced further than that', next: 1 }
+  },
+  {
+    desc: STAGES[1].treeDesc,
+    yes: { label: 'Yes',                          stage: 'others' },
+    no:  { label: 'I have advanced further than that', next: 2 }
+  },
+  {
+    // FIX R13: agreeing with the innovation description selects Stage 3, not Stage 4.
+    desc: STAGES[2].treeDesc,
+    yes: { label: 'Yes — Leads innovations (Stage 3)', stage: 'innovations' },
+    no:  { label: 'I lead strategic change across services or organisations — Leads systems (Stage 4)', stage: 'systems' }
+  }
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+const STORAGE_KEY = 'ahlap-self-assessment-v1';
+
+const state = {
+  stage: null,      // stage id
+  answers: {},      // 'domainId.index' -> 1..5
+  notes: {},        // 'domainId.index' -> string
+  wilp: [],         // [{ need, activities, done, reflection, seed }]
+  wilpEdited: false // FIX R03: structural changes count as edits, even if remaining rows are untouched.
+};
+
+const domainById = id => DOMAINS.find(d => d.id === id);
+const stageById  = id => STAGES.find(s => s.id === id);
+const qKey = (domainId, i) => domainId + '.' + i;
+const statementsFor = (stageId, domainId) => STATEMENTS[stageId][domainId];
+
+function totalQuestions(stageId) {
+  return DOMAINS.reduce((n, d) => n + statementsFor(stageId, d.id).length, 0);
+}
+
+function answeredCount(domainId) {
+  if (!state.stage) return 0;
+  const domains = domainId ? [domainById(domainId)] : DOMAINS;
+  return domains.reduce((n, d) => {
+    const len = statementsFor(state.stage, d.id).length;
+    for (let i = 0; i < len; i++) if (state.answers[qKey(d.id, i)]) n++;
+    return n;
+  }, 0);
+}
+
+function domainAverage(domainId) {
+  const len = statementsFor(state.stage, domainId).length;
+  let sum = 0, n = 0;
+  for (let i = 0; i < len; i++) {
+    const v = state.answers[qKey(domainId, i)];
+    if (v) { sum += v; n++; }
+  }
+  return n ? sum / n : null;
+}
+
+/* Bands used to prioritise development conversations. */
+function bandFor(avg) {
+  if (avg === null) return { key: null, label: 'Not answered', css: 'tier-none' };
+  if (avg < CONFIG.band.lowBelow)   return { key: 'low',  label: 'Developing',  css: 'tier-low'  }; // FIX M1
+  if (avg <= CONFIG.band.highAbove) return { key: 'mid',  label: 'Progressing', css: 'tier-mid'  };
+  return { key: 'high', label: 'Established', css: 'tier-high' };
+}
+
+const emptyWilpRow = () => ({ need: '', activities: '', done: false, reflection: '', seed: '' }); // FIX M2
+const str = v => (typeof v === 'string' ? v : '');
+
+// FIX R01: illustrative activity prompts, not prescribed or pre-entered activities.
+const ACTIVITY_EXAMPLES = {
+  clinical: 'e.g. Supervised case review and clinical guideline appraisal',
+  person: 'e.g. Consumer feedback and shared decision-making practice',
+  management: 'e.g. Project planning or resource management training',
+  learning: 'e.g. Journal club, critical appraisal or peer mentoring',
+  governance: 'e.g. Clinical audit or safety and quality improvement',
+  data: 'e.g. Digital systems training or a data quality review'
+};
+function activityPlaceholder(need) {
+  const text = str(need).trim();
+  // Recognise explicit single-domain identifiers only; never guess from free-form wording.
+  // FIX R01: anchored matching gives ambiguous or multi-domain descriptions a neutral hint.
+  const domain = DOMAINS.find(d => d.title.toLowerCase() === text.toLowerCase() ||
+    new RegExp('^Domain\\s+' + d.num + '(?:\\s*[—–-]\\s*' + d.title +
+      ')?(?:\\s*\\(\\d+(?:\\.\\d+)?\\s*/\\s*5\\))?$', 'i').test(text));
+  return domain ? ACTIVITY_EXAMPLES[domain.id]
+    : 'e.g. Agree a relevant learning activity with your supervisor';
+}
+
+// FIX R02: ratings are not the only work that must be resumable or protected.
+function hasRecordedWork() {
+  return Object.keys(state.answers).length > 0 || Object.values(state.notes).some(v => v.trim()) ||
+    state.wilpEdited || state.wilp.some(r => r.need || r.activities || r.reflection || r.done);
+}
+
+/* FIX B1: rebuild state from storage field by field, keeping only values the app
+   could have written itself. A tampered or half-written payload previously
+   reached the averages untouched (strings concatenate, 99 plots off the chart). */
+function sanitiseSaved(saved) {
+  if (!saved || typeof saved !== 'object' || !stageById(saved.stage)) return null;
+  const answers = {}, notes = {};
+  const a = saved.answers && typeof saved.answers === 'object' ? saved.answers : {};
+  const n = saved.notes   && typeof saved.notes   === 'object' ? saved.notes   : {};
+  DOMAINS.forEach(d => {
+    const len = statementsFor(saved.stage, d.id).length;
+    for (let i = 0; i < len; i++) {
+      const k = qKey(d.id, i);
+      if (Number.isInteger(a[k]) && a[k] >= 1 && a[k] <= SCALE.length) answers[k] = a[k];
+      if (typeof n[k] === 'string' && n[k].trim()) notes[k] = n[k];
+    }
+  });
+  const wilp = (Array.isArray(saved.wilp) ? saved.wilp : [])
+    .filter(r => r && typeof r === 'object')
+    .map(r => ({ need: str(r.need), activities: str(r.activities), done: r.done === true,
+                 reflection: str(r.reflection), seed: str(r.seed) }));
+  // FIX R03: migrate older saves conservatively; retain any apparently manual plan.
+  const wilpEdited = saved.wilpEdited === true || wilp.some(r =>
+    r.activities || r.reflection || r.done || r.need !== r.seed ||
+    (typeof saved.wilpEdited !== 'boolean' && !r.seed));
+  return { stage: saved.stage, answers, notes, wilp, wilpEdited };
+}
+
+// FIX R11: compare against the last version this tab read or successfully wrote.
+let storageSnapshot = null, storageConflict = false;
+let saveTimer = null, flashTimer = null;
+
+// FIX R04: persistent feedback replaces the one-off, easily missed failure toast.
+function storageWarning(message) {
+  const warning = document.getElementById('storage-warning');
+  warning.textContent = message;
+  warning.hidden = !message;
+  if (message) {
+    clearTimeout(flashTimer);
+    const flash = document.getElementById('save-flash');
+    flash.classList.remove('on');
+    flash.textContent = '';
+  }
+}
+function markStorageConflict() {
+  // FIX R11: retain current on-screen work but never silently replace another tab's save.
+  storageConflict = true;
+  storageWarning('Saved progress changed in another tab. Saving and clearing the saved copy are paused here. Print or copy any work you need from this tab, then reload to use the latest saved progress.');
+}
+function savedVersionMatches() {
+  if (storageConflict) return false;
+  if (localStorage.getItem(STORAGE_KEY) !== storageSnapshot) {
+    markStorageConflict();
+    return false;
+  }
+  return true;
+}
+function loadState() {
+  let raw;
+  try { raw = localStorage.getItem(STORAGE_KEY); storageSnapshot = raw; }
+  catch (e) { storageWarning('Saved progress cannot be accessed in this browser. Keep a printed or copied record before closing.'); return; } // FIX R04
+  if (!raw) return;
+  let clean = null;
+  try { clean = sanitiseSaved(JSON.parse(raw)); } catch (e) { /* corrupt payload — start fresh */ }
+  if (clean) Object.assign(state, clean);
+  else storageWarning('Saved progress could not be restored. Starting a new assessment will replace that unreadable saved copy.'); // FIX R04
+}
+
+/* FIX B6: `quiet` skips the "Progress saved" flash for housekeeping writes (e.g. choosing a stage). */
+function persistState(quiet) {
+  // FIX R04: an immediate save also satisfies any pending debounced save.
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  try {
+    if (!savedVersionMatches()) return false; // FIX R11
+    const raw = JSON.stringify(state);
+    localStorage.setItem(STORAGE_KEY, raw);
+    storageSnapshot = raw; // FIX R11
+  } catch (e) {
+    storageWarning('Progress could not be saved in this browser. Print or copy your work before closing.'); // FIX R04
+    return false;
+  }
+  storageWarning(''); // FIX R04: a successful retry clears the persistent warning.
+  if (quiet) return true;
+  const flash = document.getElementById('save-flash');
+  flash.textContent = 'Progress saved ✓'; // FIX R04
+  flash.classList.add('on');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { flash.classList.remove('on'); flash.textContent = ''; }, CONFIG.saveFlashMs); // FIX R04
+  return true;
+}
+
+/* FIX B3: one debounce for free-text fields, flushed on navigation and page hide so a
+   note typed in the last half-second is never lost. */
+function schedulePersist() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { saveTimer = null; persistState(); }, CONFIG.saveDebounceMs);
+}
+function flushPersist() {
+  if (saveTimer === null) return;
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  persistState(true);
+}
+
+function clearSaved() {
+  // FIX R04: reset must not leave a scheduled write or claim a failed deletion succeeded.
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  clearTimeout(flashTimer);
+  document.getElementById('save-flash').classList.remove('on');
+  document.getElementById('save-flash').textContent = '';
+  let removed = false;
+  try {
+    if (savedVersionMatches()) { // FIX R11: do not delete another tab's newer work.
+      localStorage.removeItem(STORAGE_KEY);
+      storageSnapshot = null;
+      removed = true;
+      storageWarning('');
+    }
+  } catch (e) {
+    storageWarning('This session was cleared, but the saved copy could not be removed from this browser. It may reappear after reload.');
+  }
+  state.stage = null;
+  state.answers = {};
+  state.notes = {};
+  state.wilp = [];
+  state.wilpEdited = false; // FIX R03
+  return removed;
+}
+
+/* ================================================================
+   VIEW SWITCHING
+   ================================================================ */
+/* FIX B4: `'instant' in window` was always false; plain scrollTo(0,0) is what was intended.
+   FIX A3: move keyboard/screen-reader focus to the new view's heading. */
+function show(view, focusSelector) {
+  ['intro', 'tree', 'assess', 'report'].forEach(v => {
+    document.getElementById('view-' + v).hidden = (v !== view);
+  });
+  document.getElementById('btn-home').hidden = (view === 'intro');
+  window.scrollTo(0, 0);
+  if (focusSelector) focusEl(document.querySelector(focusSelector));
+  autosizeAll('#view-' + view + ' textarea'); // FIX R06: size restored fields after revealing the view.
+}
+
+function focusEl(el) {
+  if (!el) return;
+  if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+  el.focus({ preventScroll: true });
+}
+
+/* FIX X5: textareas grow with their content on screen so the user sees every line.
+   (Printing does not rely on this: the plan prints from .print-text mirrors instead,
+   because a height measured at screen width is wrong at the narrower print width.)
+   Hidden elements report scrollHeight 0 and are skipped. */
+// FIX R06: coalesce input/reveal/resize work into one frame and batch layout reads/writes.
+const pendingTextareas = new Set();
+let layoutFrame = null;
+function autosize(ta) {
+  if (ta) pendingTextareas.add(ta);
+  if (layoutFrame !== null) return;
+  layoutFrame = requestAnimationFrame(() => {
+    layoutFrame = null;
+    const fields = [...pendingTextareas].filter(el => el.isConnected && el.getClientRects().length);
+    pendingTextareas.clear();
+    fields.forEach(el => { el.style.height = 'auto'; });
+    const heights = fields.map(el => el.scrollHeight + el.offsetHeight - el.clientHeight);
+    fields.forEach((el, i) => { el.style.height = heights[i] + 'px'; });
+    // FIX R07: only genuinely overflowing, visible table wrappers enter the Tab order.
+    document.querySelectorAll('.table-wrap').forEach(wrap => {
+      const overflowing = wrap.getClientRects().length && wrap.scrollWidth > wrap.clientWidth;
+      if (overflowing) {
+        wrap.tabIndex = 0;
+        wrap.setAttribute('role', 'region');
+        const context = wrap.closest('.card, .scale-key');
+        const heading = context && context.querySelector('h2, h3, summary');
+        wrap.setAttribute('aria-label', (heading ? heading.textContent.trim() : 'Table') + ' — scrollable table');
+      } else {
+        wrap.removeAttribute('tabindex');
+        wrap.removeAttribute('role');
+        wrap.removeAttribute('aria-label');
+      }
+    });
+  });
+}
+function autosizeAll(selector) {
+  document.querySelectorAll(selector).forEach(ta => pendingTextareas.add(ta));
+  autosize(); // also refresh keyboard scrolling when the current view has no textareas.
+}
+window.addEventListener('resize', () => autosizeAll('textarea'));
+
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), CONFIG.toastMs);
+}
+
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ================================================================
+   CAPABILITY COMPASS (SVG)
+   Reproduces the published compass: a navy annulus carrying the six
+   domain labels, with either the four nested stage circles (concept
+   version) or the five scored rings (plot version) inside it.
+   ================================================================ */
+function compassSvg(opts) {
+  const size = 460, c = size / 2;
+  const rOuter = 222, rInner = 188;          // navy annulus
+  const rBandMid = (rOuter + rInner) / 2;
+  const n = COMPASS_ORDER.length;
+  const parts = [];
+  const uid = opts.uid;
+
+  // Curved paths for the six domain labels, one per 60-degree sector.
+  // Sector i is centred on -90 + i*60 degrees; labels read left-to-right
+  // along the arc, flipping on the lower half so they stay upright.
+  const arcPath = (id, startDeg, endDeg, r) => {
+    const a1 = startDeg * Math.PI / 180, a2 = endDeg * Math.PI / 180;
+    const x1 = c + r * Math.cos(a1), y1 = c + r * Math.sin(a1);
+    const x2 = c + r * Math.cos(a2), y2 = c + r * Math.sin(a2);
+    const sweep = endDeg > startDeg ? 1 : 0;
+    return `<path id="${id}" d="M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 0 ${sweep} ${x2.toFixed(2)} ${y2.toFixed(2)}" fill="none"/>`;
+  };
+
+  parts.push(`<circle cx="${c}" cy="${c}" r="${rOuter}" fill="#051180"/>`);
+  parts.push(`<circle cx="${c}" cy="${c}" r="${rInner}" fill="#ffffff"/>`);
+
+  const defs = [];
+  COMPASS_ORDER.forEach((id, i) => {
+    const centre = -90 + i * 60;
+    const lower = centre > 0 && centre < 180;   // bottom half: reverse direction
+    const from = lower ? centre + 28 : centre - 28;
+    const to   = lower ? centre - 28 : centre + 28;
+    defs.push(arcPath(`${uid}-arc-${id}`, from, to, lower ? rBandMid + 5 : rBandMid - 5));
+  });
+  parts.push(`<defs>${defs.join('')}</defs>`);
+
+  COMPASS_ORDER.forEach(id => {
+    const d = domainById(id);
+    parts.push(
+      `<text font-size="13.5" font-weight="700" fill="${d.color}" letter-spacing="0.2">` +
+      `<textPath href="#${uid}-arc-${id}" startOffset="50%" text-anchor="middle">${esc(d.compassLabel)}</textPath></text>`
+    );
+  });
+
+  if (opts.mode === 'concept') {
+    // Four nested circles: self (innermost) out to systems.
+    const radii = [46, 88, 130, 172];
+    const labels = ['self', 'others', 'innovations', 'systems'];
+    for (let i = radii.length - 1; i >= 0; i--) {
+      parts.push(`<circle cx="${c}" cy="${c}" r="${radii[i]}" fill="none" stroke="#051180" stroke-width="${1 + i * 0.9}"/>`);
+    }
+    radii.forEach((r, i) => {
+      const y = c - r + (i === 0 ? 14 : 20);
+      parts.push(`<text x="${c}" y="${y}" text-anchor="middle" font-size="${i === 0 ? 12 : 13.5}" font-weight="700" fill="#1c2233">${labels[i]}</text>`);
+    });
+  } else {
+    // Scored plot: five grey rings, six spokes on the sector boundaries.
+    const rMax = 168;
+    const step = rMax / 5;
+    for (let ring = 1; ring <= 5; ring++) {
+      parts.push(`<circle cx="${c}" cy="${c}" r="${(step * ring).toFixed(1)}" fill="none" stroke="#d5d8e4" stroke-width="${ring === 5 ? 2 : 3.2}"/>`);
+    }
+    for (let i = 0; i < n; i++) {
+      const a = (-90 + 30 + i * 60) * Math.PI / 180;
+      parts.push(`<line x1="${c}" y1="${c}" x2="${(c + rMax * Math.cos(a)).toFixed(1)}" y2="${(c + rMax * Math.sin(a)).toFixed(1)}" stroke="#e6e8f0" stroke-width="1.2"/>`);
+    }
+    for (let ring = 1; ring <= 5; ring++) {
+      parts.push(`<text x="${c}" y="${(c - step * ring + 13).toFixed(1)}" text-anchor="middle" font-size="12" fill="#6b7488" stroke="#ffffff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">${ring}</text>`);
+    }
+
+    const pt = (value, i) => {
+      const a = (-90 + i * 60) * Math.PI / 180;
+      const r = step * value;
+      return [(c + r * Math.cos(a)).toFixed(1), (c + r * Math.sin(a)).toFixed(1)];
+    };
+
+    // Reference outline: a score of 5 in every domain.
+    parts.push(`<polygon points="${COMPASS_ORDER.map((_, i) => pt(5, i).join(',')).join(' ')}" fill="none" stroke="#8a93b8" stroke-width="1.6" stroke-dasharray="5 4"/>`);
+
+    // The user's own profile, across the domains they answered.
+    const scored = COMPASS_ORDER.map((id, i) => ({ id, i, avg: opts.averages[id] })).filter(o => o.avg !== null);
+    if (scored.length >= 3) {
+      parts.push(`<polygon points="${scored.map(o => pt(o.avg, o.i).join(',')).join(' ')}" fill="rgba(5,17,128,.28)" stroke="#051180" stroke-width="2.4" stroke-linejoin="round"/>`);
+    } else if (scored.length === 2) {
+      const [a, b] = scored.map(o => pt(o.avg, o.i));
+      parts.push(`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#051180" stroke-width="2.4"/>`);
+    }
+    scored.forEach(o => {
+      const [x, y] = pt(o.avg, o.i);
+      const d = domainById(o.id);
+      parts.push(`<circle cx="${x}" cy="${y}" r="5.5" fill="${d.color}" stroke="#051180" stroke-width="1.8"><title>${esc(d.title)}: ${o.avg.toFixed(1)} of 5</title></circle>`);
+    });
+  }
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="100%" style="max-width:${opts.maxWidth || 440}px;height:auto;display:block;margin:0 auto"
+    role="img" aria-label="${esc(opts.ariaLabel)}" font-family="inherit">${parts.join('')}</svg>`;
+}
+
+/* ================================================================
+   INTRO
+   ================================================================ */
+function renderIntro() {
+  document.getElementById('compass-intro-holder').innerHTML = compassSvg({
+    mode: 'concept', uid: 'intro', maxWidth: 420,
+    ariaLabel: 'The Capability Compass: six domains — learning, management, data and technology, clinical practice, ' +
+               'person-centred and clinical governance — arranged around four nested stages: self, others, innovations and systems.'
+  });
+
+  // FIX D2: reference cards rather than wide tables
+  document.getElementById('domain-grid').innerHTML = DOMAINS.map(d => `
+    <li class="ref-card" style="--accent:${d.color};--accent-ink:${d.ink}">
+      <div class="ref-head">
+        <span class="domain-dot" style="background:${d.color};margin-right:0"></span>
+        <h3>${esc(d.title)}</h3>
+      </div>
+      <p>${esc(d.description)}</p>
+    </li>`).join('');
+
+  document.getElementById('stage-grid-intro').innerHTML = STAGES.map(s => `
+    <li class="ref-card">
+      <div class="ref-head">
+        <span class="ref-num" aria-hidden="true">${s.num}</span>
+        <h3>${esc(s.title)}</h3>
+      </div>
+      <p class="ref-meta">${esc(s.role)} &middot; ${esc(s.focus)}</p>
+      <p>${esc(s.sphere)}</p>
+    </li>`).join('');
+
+  document.getElementById('scale-table-body').innerHTML = scaleRows('');
+  // FIX U1: the same rows feed the rating guide above the statements; its cells carry ids
+  // so every radio can point at its descriptor with aria-describedby.
+  document.getElementById('scale-key-body').innerHTML = scaleRows('skey-');
+
+  // FIX M6: derived from the data rather than typed into the copy
+  document.getElementById('intro-count').textContent =
+    totalQuestions(STAGES[0].id) + ' statements across ' + DOMAINS.length + ' domains';
+
+  renderResumeNote();
+}
+
+function scaleRows(idPrefix) {
+  return SCALE.map(s => `
+    <tr>
+      <td class="num"><strong>${s.value}</strong></td>
+      <td class="sk-label">${esc(s.label)}</td>
+      <td ${idPrefix ? `id="${idPrefix}${s.value}"` : ''}>${esc(s.guide)}</td>
+    </tr>`).join('');
+}
+
+function renderResumeNote() {
+  const note = document.getElementById('resume-note');
+  const count = state.stage ? answeredCount() : 0;
+  if (!state.stage) { note.hidden = true; return; } // FIX R02: a selected stage or notes-only session is resumable.
+  note.hidden = false;
+  document.getElementById('resume-stage').textContent = stageById(state.stage).title;
+  document.getElementById('resume-count').textContent =
+    count + ' of ' + totalQuestions(state.stage);
+}
+
+/* ================================================================
+   FRAMEWORK ASSESSMENT TREE
+   ================================================================ */
+let treeIndex = 0;
+
+function renderTree() {
+  const node = TREE[treeIndex];
+  document.getElementById('tree-progress').textContent =
+    'Question ' + (treeIndex + 1) + ' of ' + TREE.length;
+  document.getElementById('tree-question').textContent = node.desc;
+
+  // FIX P2: buttons are handled by one delegated listener on #tree-actions (see WIRING)
+  document.getElementById('tree-actions').innerHTML =
+    `<button type="button" class="btn" data-tree="yes">${esc(node.yes.label)}</button>` +
+    `<button type="button" class="btn btn-secondary" data-tree="no">${esc(node.no.label)}</button>` +
+    (treeIndex > 0 ? '<button type="button" class="btn btn-quiet" data-tree="back">&#8592; Back</button>' : '');
+
+  document.getElementById('stage-picker').hidden = true;
+}
+
+function answerTree(which) {
+  if (which === 'back') { treeIndex = Math.max(0, treeIndex - 1); renderTree(); focusEl(document.getElementById('tree-question')); return; }
+  const choice = TREE[treeIndex][which];
+  if (!choice) return;
+  if (choice.stage) { proposeStage(choice.stage); return; }
+  treeIndex = choice.next;
+  renderTree();
+  focusEl(document.getElementById('tree-question')); // FIX A3: focus follows the new question
+}
+
+/* Show the suggested stage, and let the user confirm or pick another. */
+function proposeStage(stageId) {
+  const title = stageById(stageId).title;
+  showStagePicker('Suggested stage: ' + title,
+    'Based on your answers, start the framework at <strong>' + esc(title) + '</strong>. ' +
+    'If that does not sound like you, choose a different stage below — you may do so with the consent of your supervisor.',
+    stageId);
+}
+
+/* FIX M3: the two ways into the picker (tree result, "skip the tree") shared this logic. */
+function showStagePicker(title, leadHtml, suggestedId) {
+  const picker = document.getElementById('stage-picker');
+  picker.hidden = false;
+  document.getElementById('stage-picker-title').textContent = title;
+  document.getElementById('stage-picker-lead').innerHTML = leadHtml;
+  renderStageGrid(suggestedId);
+  picker.scrollIntoView({ block: 'start' });
+  focusEl(document.getElementById('stage-picker-title')); // FIX A3
+}
+
+function renderStageGrid(suggestedId) {
+  // FIX A6: these buttons navigate, so aria-pressed (a toggle state) was misleading;
+  // the suggestion is conveyed by a class plus visually hidden text instead.
+  document.getElementById('stage-grid').innerHTML = STAGES.map(s => {
+    const sug = s.id === suggestedId;
+    return `
+    <button type="button" class="stage-card ${sug ? 'suggested' : ''}" data-stage="${s.id}">
+      <span class="sc-num" aria-hidden="true">${s.num}</span>
+      <span class="sc-title">${esc(s.title)}${sug ? ' <span aria-hidden="true">&#10003;</span><span class="visually-hidden">(suggested)</span>' : ''}</span>
+      <span class="sc-role">${esc(s.role)} &middot; ${esc(s.focus)}</span>
+      <span class="sc-desc">${esc(s.sphere)}</span>
+    </button>`;
+  }).join('');
+}
+
+/* ================================================================
+   ASSESSMENT
+   ================================================================ */
+function startAssessment(stageId) {
+  if (!stageById(stageId)) return; // FIX B5: ignore anything that is not a known stage
+  if (state.stage !== stageId) {
+    // FIX R02: protect notes and plans as well as ratings, and name all cleared fields.
+    const hadWork = state.stage && hasRecordedWork();
+    if (hadWork && !confirm(
+      'Switching to ' + stageById(stageId).title + ' will clear the answers, notes and learning plan for ' +
+      stageById(state.stage).title + '. Continue?')) return;
+    state.stage = stageId;
+    state.answers = {};
+    state.notes = {};
+    state.wilp = [];
+    state.wilpEdited = false; // FIX R03: a new stage starts a new automatic plan.
+  }
+  persistState(true); // FIX B6: nothing answered yet, so no "Progress saved" flash
+  renderAssessment();
+  show('assess', '#domain-panels .domain-panel:not([hidden]) h2');
+}
+
+function renderAssessment() {
+  const stage = stageById(state.stage);
+  document.getElementById('assess-stage-name').textContent =
+    stage.title + ' — ' + stage.role;
+  document.getElementById('progress-total').textContent = totalQuestions(state.stage);
+
+  // FIX A2: roving tabindex — only the selected tab is in the Tab order; arrows move between tabs
+  document.getElementById('domain-tabs').innerHTML = DOMAINS.map((d, i) => `
+    <button type="button" class="domain-tab" role="tab" id="tab-${d.id}"
+            aria-controls="panel-${d.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}"
+            style="--domain-color:${d.color}" data-domain="${d.id}">
+      <span style="color:${d.ink}">${d.num}. ${esc(d.title)}</span>
+      <span class="tab-count" id="tab-count-${d.id}"></span>
+    </button>`).join('');
+
+  document.getElementById('domain-panels').innerHTML = DOMAINS.map((d, di) => {
+    const qs = statementsFor(state.stage, d.id);
+    const items = qs.map((text, i) => {
+      const key = qKey(d.id, i);
+      const val = state.answers[key];
+      const note = state.notes[key] || '';
+      // FIX U1: tile shows score + short label; the descriptor is the tile's tooltip and its
+      //         accessible description (aria-describedby -> rating guide cell), not repeated text.
+      // FIX X1: the selected tile is marked with a class rather than :has(), which Firefox ESR lacks.
+      const radios = SCALE.map(s => `
+        <label for="r-${key}-${s.value}" class="${val === s.value ? 'selected' : ''}" title="${esc(s.guide)}">
+          <input type="radio" id="r-${key}-${s.value}" name="q-${key}" value="${s.value}"
+                 ${val === s.value ? 'checked' : ''} data-key="${key}" aria-describedby="skey-${s.value}">
+          <span class="sc-n">${s.value}</span>
+          <span class="sc-l">${esc(s.label)}</span>
+        </label>`).join('');
+      return `
+        <div class="q-item ${val ? 'answered' : ''} ${note ? 'has-note' : ''}"
+             style="--domain-color:${d.color};--domain-ink:${d.ink}" id="qi-${key}">
+          <fieldset>
+            <!-- FIX A1: the statement is the group's visible legend, announced once -->
+            <legend><span class="q-text"><span class="q-num">${d.num}.${i + 1}</span> <span>${esc(text)}</span></span></legend>
+            <div class="scale">${radios}</div>
+          </fieldset>
+          <button type="button" class="note-toggle" data-note-toggle="${key}"
+                  aria-expanded="${note ? 'true' : 'false'}" aria-controls="note-${key}">
+            ${note ? 'Edit note' : 'Add a note for your supervisor'}
+          </button>
+          <div class="note-box" id="note-${key}" ${note ? '' : 'hidden'}>
+            <label for="ta-${key}">Notes for discussion</label>
+            <textarea id="ta-${key}" data-note="${key}" rows="2"
+              placeholder="Evidence, examples, or something to raise with your supervisor">${esc(note)}</textarea>
+          </div>
+        </div>`;
+    }).join('');
+
+    const isLast = di === DOMAINS.length - 1;
+    return `
+      <div class="domain-panel" id="panel-${d.id}" role="tabpanel" aria-labelledby="tab-${d.id}" ${di === 0 ? '' : 'hidden'}>
+        <div class="card">
+          <div class="domain-head" style="--domain-color:${d.color}">
+            <h2 tabindex="-1">Domain ${d.num}: ${esc(d.title)}</h2>
+            <p>${esc(d.description)}</p>
+          </div>
+          ${items}
+          <div class="panel-nav no-print">
+            ${di > 0 ? `<button type="button" class="btn btn-quiet" data-goto="${DOMAINS[di - 1].id}">&#8592; ${esc(DOMAINS[di - 1].title)}</button>` : '<span></span>'}
+            ${isLast
+              ? '<button type="button" class="btn" id="btn-generate" style="background:#1e6b2b">See my Capability Compass &rarr;</button>'
+              : `<button type="button" class="btn" data-goto="${DOMAINS[di + 1].id}">${esc(DOMAINS[di + 1].title)} &rarr;</button>`}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  updateProgress(); // FIX P2: no per-render wiring — the panel container is wired once at boot
+}
+
+/* FIX P2: one handler per event type on the static #domain-panels container. */
+function onPanelChange(e) {
+  const input = e.target;
+  if (!input.matches('input[type="radio"][data-key]')) return;
+  const key = input.dataset.key;
+  state.answers[key] = Number(input.value);
+  const item = document.getElementById('qi-' + key);
+  item.classList.add('answered');
+  item.querySelectorAll('.scale label').forEach(l => l.classList.toggle('selected', l.contains(input))); // FIX X1
+  updateProgress();
+  persistState();
+}
+
+function onPanelClick(e) {
+  const goto = e.target.closest('[data-goto]');
+  if (goto) { openDomain(goto.dataset.goto, true); return; }
+  const toggle = e.target.closest('[data-note-toggle]');
+  if (toggle) {
+    const box = document.getElementById('note-' + toggle.dataset.noteToggle);
+    box.hidden = !box.hidden;
+    toggle.setAttribute('aria-expanded', String(!box.hidden)); // FIX A11
+    if (!box.hidden) { const ta = box.querySelector('textarea'); autosize(ta); ta.focus(); } // FIX X5
+    return;
+  }
+  if (e.target.closest('#btn-generate')) generateReport();
+}
+
+function onPanelInput(e) {
+  const ta = e.target;
+  if (!ta.matches('textarea[data-note]')) return;
+  const key = ta.dataset.note;
+  const v = ta.value; // FIX R12: preserve formatting; trim only to decide whether a note is empty.
+  if (v.trim()) state.notes[key] = v; else delete state.notes[key];
+  document.getElementById('qi-' + key).classList.toggle('has-note', !!v.trim()); // FIX R12
+  const btn = document.querySelector('[data-note-toggle="' + key + '"]');
+  if (btn) btn.textContent = v.trim() ? 'Edit note' : 'Add a note for your supervisor'; // FIX R12
+  autosize(ta); // FIX X5
+  schedulePersist(); // FIX B3
+}
+
+/* FIX A2: arrow keys move between tabs (automatic activation), Home/End jump to the ends. */
+function onTabKeydown(e) {
+  const tab = e.target.closest('.domain-tab');
+  if (!tab) return;
+  const n = DOMAINS.length;
+  const idx = DOMAINS.findIndex(d => d.id === tab.dataset.domain);
+  let next = null;
+  if (e.key === 'ArrowRight') next = (idx + 1) % n;
+  else if (e.key === 'ArrowLeft') next = (idx - 1 + n) % n;
+  else if (e.key === 'Home') next = 0;
+  else if (e.key === 'End') next = n - 1;
+  if (next === null) return;
+  e.preventDefault();
+  openDomain(DOMAINS[next].id, false);
+  document.getElementById('tab-' + DOMAINS[next].id).focus();
+}
+
+/* FIX A3: `moveFocus` sends focus to the panel heading when navigation came from the
+   prev/next buttons, whose own element disappears with the old panel. */
+function openDomain(id, moveFocus) {
+  DOMAINS.forEach(d => {
+    const selected = d.id === id;
+    document.getElementById('panel-' + d.id).hidden = !selected;
+    const tab = document.getElementById('tab-' + d.id);
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+  });
+  document.getElementById('view-assess').scrollIntoView({ block: 'start' }); // CSS decides smooth vs instant (FIX P3)
+  if (moveFocus) focusEl(document.querySelector('#panel-' + id + ' h2'));
+  autosizeAll('#panel-' + id + ' textarea'); // FIX R06: restored notes need sizing when their tab becomes visible.
+}
+
+function updateProgress() {
+  const total = totalQuestions(state.stage);
+  const done = answeredCount();
+  document.getElementById('progress-count').textContent = done;
+  document.getElementById('progress-fill').style.width = (total ? (done / total) * 100 : 0) + '%';
+  const bar = document.getElementById('progress-bar');
+  bar.setAttribute('aria-valuenow', total ? Math.round(done / total * 100) : 0);
+  bar.setAttribute('aria-valuetext', done + ' of ' + total + ' statements answered'); // FIX A9
+
+  DOMAINS.forEach(d => {
+    const len = statementsFor(state.stage, d.id).length;
+    const n = answeredCount(d.id);
+    document.getElementById('tab-count-' + d.id).textContent = n + '/' + len;
+    document.getElementById('tab-' + d.id).classList.toggle('complete', n === len);
+  });
+}
+
+/* ================================================================
+   REPORT
+   ================================================================ */
+function generateReport() {
+  const total = totalQuestions(state.stage);
+  const missing = total - answeredCount();
+  if (missing === total) {
+    toast('Please answer at least one statement before generating your compass.');
+    return;
+  }
+  if (missing > 0 && !confirm(
+      'You have ' + missing + ' unanswered statement' + (missing === 1 ? '' : 's') +
+      '. Unanswered statements are excluded from your domain averages. Continue anyway?')) return;
+  flushPersist(); // FIX B3
+  renderReport();
+  show('report', '#view-report h2');
+  autosizeAll('#wilp-body textarea'); // FIX X5: runs after the view is visible
+}
+
+function renderReport() {
+  const stage = stageById(state.stage);
+  const nextStage = STAGES[stage.num] || null;   // stage.num is 1-based
+
+  document.getElementById('report-date').innerHTML =
+    '<strong>' + esc(stage.title) + '</strong> &middot; ' + esc(stage.role) +
+    // FIX R09: generating a report does not imply that all statements were completed.
+    ' &middot; generated ' + new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) +
+    ' &middot; ' + answeredCount() + ' of ' + totalQuestions(state.stage) + ' statements answered';
+  // FIX R09: there is no stage beyond Leads systems.
+  document.getElementById('progression-note').textContent = (nextStage
+    ? 'A score of five across all domains may indicate you are equipped with the skills to advance to the next stage of the framework. '
+    : 'Leads systems is the final stage. Continue to deepen these capabilities and support colleagues to progress. ') +
+    'Scores are not designed for use as performance indicators.';
+
+  const averages = {};
+  DOMAINS.forEach(d => { averages[d.id] = domainAverage(d.id); });
+
+  document.getElementById('compass-report-holder').innerHTML = compassSvg({
+    mode: 'plot', uid: 'report', averages: averages, maxWidth: 460,
+    ariaLabel: 'Capability compass showing your average score in each of the six domains: ' +
+      DOMAINS.map(d => d.title + ' ' + (averages[d.id] === null ? 'not answered' : averages[d.id].toFixed(1) + ' of 5')).join(', ') + '.'
+  });
+
+  // Results table
+  document.getElementById('results-body').innerHTML = DOMAINS.map(d => {
+    const avg = averages[d.id];
+    const band = bandFor(avg);
+    const len = statementsFor(state.stage, d.id).length;
+    const n = answeredCount(d.id);
+    const partial = n > 0 && n < len
+      ? ` <small style="color:var(--ink-soft)">(${n}/${len} answered)</small>` : '';
+    return `<tr>
+      <td><span class="domain-label"><span class="domain-dot" style="background:${d.color}"></span><span>${esc(d.title)}${partial}</span></span></td>
+      <td class="num">${avg === null ? '&mdash;' : avg.toFixed(1) + ' / 5'}</td>
+      <td><span class="tier-badge ${band.css}">${band.label}</span></td>
+    </tr>`;
+  }).join('');
+
+  const priority = priorityDomains(averages); // FIX P1: computed once, shared by the three sections
+  renderSupervisorSection(averages, stage, priority);
+  renderFeedbackCards(averages, stage, nextStage, priority);
+  ensureWilpSeed(averages, priority);
+  renderWilp();
+}
+
+/* Priority domains: the lowest scoring, to focus the supervisor conversation. */
+function priorityDomains(averages) {
+  const scored = DOMAINS.filter(d => averages[d.id] !== null);
+  const cap = CONFIG.band.highAbove; // FIX M1
+  if (scored.length < 2) return scored.filter(d => averages[d.id] <= cap);
+
+  if (!isUneven(averages)) return []; // established across the board, or too even to single any domain out
+
+  return scored
+    .filter(d => averages[d.id] <= cap)
+    .sort((a, b) => averages[a.id] - averages[b.id] || a.num - b.num)
+    .slice(0, CONFIG.focus.maxDomains);
+}
+
+/* True when the spread between best and worst domain is wide enough to name a focus area. */
+function isUneven(averages) {
+  const vals = DOMAINS.map(d => averages[d.id]).filter(v => v !== null);
+  if (vals.length < 2) return false;
+  const min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  return min <= CONFIG.band.highAbove && (max - min) >= CONFIG.focus.minSpread;
+}
+
+function renderSupervisorSection(averages, stage, priority) {
+  const scored = DOMAINS.filter(d => averages[d.id] !== null);
+  const strongest = scored.slice().sort((a, b) => averages[b.id] - averages[a.id])[0];
+  const uneven = isUneven(averages);
+
+  const lines = [];
+  if (strongest && uneven && averages[strongest.id] >= 3) {
+    lines.push('Your strongest domain is <strong>' + esc(strongest.title) + '</strong> (' +
+      averages[strongest.id].toFixed(1) + ' / 5).');
+  }
+  if (priority.length) {
+    lines.push('The domain' + (priority.length === 1 ? '' : 's') + ' to focus on first ' +
+      (priority.length === 1 ? 'is' : 'are') + ' <strong>' +
+      priority.map(d => esc(d.title)).join('</strong>, <strong>') + '</strong>.');
+  } else if (scored.length && scored.every(d => averages[d.id] > CONFIG.band.highAbove)) { // FIX M1
+    // FIX R09: respect the configured threshold and avoid next-stage advice at the final stage.
+    lines.push('You rated yourself above ' + CONFIG.band.highAbove + ' in every domain you answered. ' +
+      (stage.id === STAGES[STAGES.length - 1].id
+        ? 'Leads systems is the final stage. Discuss how to deepen your capabilities and support colleagues with your supervisor.'
+        : 'A score of five across all domains may indicate you are equipped with the skills to advance to the next stage of the framework — worth discussing with your supervisor.'));
+  } else if (scored.length) {
+    lines.push('Your scores are evenly spread across the domains, so no single domain stands out as a starting ' +
+      'point. Use the statements themselves — and any notes you recorded — to agree priorities with your supervisor.');
+  }
+  lines.push('Development at the <strong>' + esc(stage.title) + '</strong> stage typically focuses on <strong>' +
+    esc(stage.focus.toLowerCase()) + '</strong>.');
+  document.getElementById('supervisor-lead').innerHTML = lines.join(' ');
+
+  // Any notes the user recorded, gathered for the conversation.
+  const noteKeys = Object.keys(state.notes).filter(k => state.notes[k]);
+  const holder = document.getElementById('notes-summary');
+  if (!noteKeys.length) {
+    holder.innerHTML = '<p class="footnote">You did not record any notes against individual statements. ' +
+      'You can go back and add them under <em>Edit answers</em>.</p>';
+    return;
+  }
+  const rows = [];
+  DOMAINS.forEach(d => {
+    const qs = statementsFor(state.stage, d.id);
+    qs.forEach((text, i) => {
+      const key = qKey(d.id, i);
+      if (!state.notes[key]) return;
+      rows.push(`<tr>
+        <td style="white-space:nowrap"><span class="domain-dot" style="background:${d.color}"></span><strong>${d.num}.${i + 1}</strong></td>
+        <td>${esc(text)}</td>
+        <!-- FIX R12: render escaped notes with their original line breaks. -->
+        <td class="note-summary-text">${esc(state.notes[key])}</td>
+      </tr>`);
+    });
+  });
+  holder.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th style="width:70px">Item</th><th style="width:40%">Statement</th><th>Your note</th></tr></thead>
+    <tbody>${rows.join('')}</tbody></table></div>`;
+}
+
+function renderFeedbackCards(averages, stage, nextStage, priority) {
+  const priorityIds = priority.map(d => d.id);
+
+  document.getElementById('feedback-cards').innerHTML = DOMAINS.map(d => {
+    const avg = averages[d.id];
+    const band = bandFor(avg);
+    const here = MATRIX[d.id][stage.id];
+    const next = nextStage ? MATRIX[d.id][nextStage.id] : null;
+
+    if (!band.key) {
+      return `<div class="card feedback-card" style="--domain-color:${d.color}">
+        <h3>Domain ${d.num}: ${esc(d.title)}</h3>
+        <p class="lead">No statements were answered in this domain, so there is nothing to report.</p>
+      </div>`;
+    }
+
+    const isPriority = priorityIds.indexOf(d.id) !== -1;
+    const readout = {
+      low:  'Your rating suggests this domain is still developing at the ' + stage.title + ' stage. ' +
+            'These are the capabilities to build towards first.',
+      mid:  'Your rating suggests you are progressing against the ' + stage.title + ' capabilities, ' +
+            'with room to consolidate and apply them more consistently.',
+      high: 'Your rating suggests the ' + stage.title + ' capabilities in this domain are well established for you.'
+    }[band.key];
+
+    return `<div class="card feedback-card" style="--domain-color:${d.color}">
+      <h3>
+        <span style="color:${d.ink}">Domain ${d.num}: ${esc(d.title)}</span>
+        <span class="score-chip">${avg.toFixed(1)} / 5 &mdash; ${band.label}</span>
+        ${isPriority ? '<span class="priority-flag">Focus area</span>' : ''}
+      </h3>
+      <p class="lead">${esc(readout)}</p>
+      <div class="fb-grid">
+        <div class="fb-col">
+          <h4>Expected at ${esc(stage.title)}</h4>
+          <ul>${here.map(x => '<li>' + esc(x) + '</li>').join('')}</ul>
+        </div>
+        <div class="fb-col">
+          ${next ? `
+            <div class="fb-next">
+              <h4>What ${esc(nextStage.title)} looks like</h4>
+              <ul>${next.map(x => '<li>' + esc(x) + '</li>').join('')}</ul>
+            </div>`
+            : `<div class="fb-next">
+              <h4>Leads systems is the final stage</h4>
+              <p style="margin:0">Continue to deepen these capabilities and support colleagues to progress
+              through the earlier stages of the framework.</p>
+            </div>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('') + `
+    <div class="card">
+      <h3>Development activities at the ${esc(stage.title)} stage</h3>
+      <p class="lead">The framework suggests these kinds of training and development for someone working at this stage.</p>
+      <ul>${stage.training.map(t => '<li>' + esc(t) + '</li>').join('')}</ul>
+      <p class="footnote" style="margin-bottom:0">Further guidance is available from the
+        <!-- FIX R15: identify the direct framework destination accurately. -->
+        <a href="${FRAMEWORK_URL}" target="_blank" rel="noopener">original framework webpage</a>.</p>
+    </div>`;
+}
+
+/* ================================================================
+   WORK-INTEGRATED LEARNING PLAN
+   ================================================================ */
+/* FIX R03: explicit edit state preserves additions/deletions and lets a still-automatic
+   blank plan acquire priorities later. Older saves are migrated by sanitiseSaved. */
+function ensureWilpSeed(averages, priority) {
+  if (state.wilpEdited) return; // FIX R03: only untouched automatic plans are regenerated.
+  state.wilp = priority.map(d => {
+    const need = 'Domain ' + d.num + ' — ' + d.title + ' (' + averages[d.id].toFixed(1) + ' / 5)';
+    return Object.assign(emptyWilpRow(), { need, seed: need });
+  });
+  if (!state.wilp.length) state.wilp = [emptyWilpRow()];
+  persistState(true);
+}
+
+function renderWilp() {
+  // FIX A7: each field names its column and row for assistive tech; handlers are delegated (FIX P2)
+  document.getElementById('wilp-body').innerHTML = state.wilp.map((row, i) => {
+    const r = 'row ' + (i + 1);
+    return `
+    <tr>
+      <td><textarea data-wilp="need" data-i="${i}" rows="2" placeholder="e.g. Criteria 1.1, 1.2, 1.3"
+          aria-label="Identified development need, ${r}">${esc(row.need)}</textarea><div class="print-text">${esc(row.need)}</div></td>
+      <!-- FIX R01: escaped, domain-specific prompt leaves the user's activity value unchanged. -->
+      <td><textarea data-wilp="activities" data-i="${i}" rows="2" placeholder="${esc(activityPlaceholder(row.need))}"
+          aria-label="Potential activities, ${r}">${esc(row.activities)}</textarea><div class="print-text">${esc(row.activities)}</div></td>
+      <td class="wilp-done"><input type="checkbox" data-wilp="done" data-i="${i}" ${row.done ? 'checked' : ''}
+          aria-label="Activity completed, ${r}"></td>
+      <td><textarea data-wilp="reflection" data-i="${i}" rows="2" placeholder="Reflection"
+          aria-label="Has this activity helped you meet the development objective, ${r}">${esc(row.reflection)}</textarea><div class="print-text">${esc(row.reflection)}</div></td>
+      <td class="no-print"><button type="button" class="wilp-del" data-del="${i}"
+          aria-label="Remove ${r}">&times;</button></td>
+    </tr>`;
+  }).join('');
+  autosizeAll('#wilp-body textarea'); // FIX X5 (no-op while the report is hidden)
+}
+
+function onWilpEdit(e) {
+  const el = e.target;
+  if (!el.matches('[data-wilp]')) return;
+  // FIX R06: input handles text; change handles checkboxes, avoiding duplicate work.
+  if ((el.type === 'checkbox') !== (e.type === 'change')) return;
+  const row = state.wilp[Number(el.dataset.i)];
+  if (!row) return;
+  state.wilpEdited = true; // FIX R03: preserve any intentional edit across report generation.
+  if (el.type === 'checkbox') { row.done = el.checked; persistState(); }
+  else {
+    row[el.dataset.wilp] = el.value;
+    // FIX R01: an edited domain changes only the hint, never an existing activity.
+    if (el.dataset.wilp === 'need') {
+      const activity = el.closest('tr').querySelector('[data-wilp="activities"]');
+      activity.placeholder = activityPlaceholder(el.value);
+    }
+    autosize(el);
+    const mirror = el.nextElementSibling;                       // FIX X5: print-only copy of the text
+    if (mirror && mirror.classList.contains('print-text')) mirror.textContent = el.value;
+    schedulePersist(); // FIX B3
+  }
+}
+
+function onWilpClick(e) {
+  if (e.detail > 1) return; // FIX R05: a double-click must not delete the next row after rerender.
+  const del = e.target.closest('[data-del]');
+  if (!del) return;
+  state.wilpEdited = true; // FIX R03: deletion is an intentional plan edit.
+  state.wilp.splice(Number(del.dataset.del), 1);
+  if (!state.wilp.length) state.wilp.push(emptyWilpRow());
+  persistState();
+  renderWilp();
+  focusEl(document.getElementById('btn-add-wilp')); // FIX A3: the removed button had focus
+}
+
+/* ================================================================
+   WIRING
+   ================================================================ */
+function goToTree() {
+  treeIndex = 0;
+  renderTree();
+  show('tree', '#tree-question');
+}
+
+/* FIX P2: containers whose contents are re-rendered are wired once, here, by delegation. */
+const panels = document.getElementById('domain-panels');
+panels.addEventListener('change', onPanelChange);
+panels.addEventListener('click', onPanelClick);
+panels.addEventListener('input', onPanelInput);
+
+const tabs = document.getElementById('domain-tabs');
+tabs.addEventListener('click', e => {
+  const tab = e.target.closest('.domain-tab');
+  if (tab) openDomain(tab.dataset.domain, false);
+});
+tabs.addEventListener('keydown', onTabKeydown); // FIX A2
+
+document.getElementById('tree-actions').addEventListener('click', e => {
+  if (e.detail > 1) return; // FIX R05: ignore the second click on a newly rendered question.
+  const btn = e.target.closest('[data-tree]');
+  if (btn) answerTree(btn.dataset.tree);
+});
+
+document.getElementById('stage-grid').addEventListener('click', e => {
+  const card = e.target.closest('.stage-card');
+  if (card) startAssessment(card.dataset.stage);
+});
+
+const wilpBody = document.getElementById('wilp-body');
+wilpBody.addEventListener('input', onWilpEdit);
+wilpBody.addEventListener('change', onWilpEdit);
+wilpBody.addEventListener('click', onWilpClick);
+
+document.getElementById('btn-start').addEventListener('click', goToTree);
+
+document.getElementById('btn-skip-tree').addEventListener('click', () => {
+  showStagePicker('Choose your stage', // FIX M3
+    'Select the stage that best describes where you are working now.', state.stage);
+});
+
+document.getElementById('btn-resume').addEventListener('click', () => {
+  renderAssessment();
+  show('assess', '#domain-panels .domain-panel:not([hidden]) h2');
+});
+
+document.getElementById('btn-clear-saved').addEventListener('click', () => {
+  if (!confirm('Discard your saved answers, notes and learning plan and start again?')) return; // FIX R02
+  const removed = clearSaved(); // FIX R04
+  renderResumeNote();
+  focusEl(document.querySelector('#view-intro h2')); // FIX R02: the discarded Resume controls disappear.
+  toast(removed ? 'Saved progress cleared.' : 'Session cleared; the saved copy was not removed.'); // FIX R04
+});
+
+document.getElementById('btn-change-stage').addEventListener('click', goToTree);
+
+document.getElementById('btn-home').addEventListener('click', () => {
+  flushPersist();
+  renderResumeNote();
+  show('intro', '#view-intro h2');
+});
+
+document.getElementById('btn-edit-answers').addEventListener('click', () => {
+  flushPersist();
+  renderAssessment();
+  show('assess', '#domain-panels .domain-panel:not([hidden]) h2');
+});
+
+document.getElementById('btn-print').addEventListener('click', () => { flushPersist(); window.print(); });
+
+document.getElementById('btn-start-over').addEventListener('click', () => {
+  if (!confirm('Start over? This clears all of your answers, notes and learning plan.')) return;
+  const removed = clearSaved(); // FIX R04
+  renderResumeNote();
+  show('intro', '#view-intro h2');
+  toast(removed ? 'Assessment cleared.' : 'Session cleared; the saved copy was not removed.'); // FIX R04
+});
+
+document.getElementById('btn-add-wilp').addEventListener('click', e => {
+  if (e.detail > 1) return; // FIX R05: one new row per double-click.
+  state.wilpEdited = true; // FIX R03
+  state.wilp.push(emptyWilpRow()); // FIX M2
+  persistState();
+  renderWilp();
+  const added = wilpBody.querySelector('tr:last-child textarea');
+  if (added) added.focus(); // FIX A3: land in the new row
+});
+
+/* FIX B3: write any pending debounced edit before the page is hidden or closed. */
+window.addEventListener('pagehide', flushPersist);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPersist(); });
+
+// FIX R14: handle cached success, live load and failure without losing the text fallback.
+const logo = document.getElementById('gov-logo');
+const logoFallback = document.getElementById('gov-logo-fallback');
+function updateLogoVisibility() {
+  const loaded = logo.complete && logo.naturalWidth > 0;
+  logo.hidden = !loaded;
+  logoFallback.hidden = loaded;
+}
+logo.addEventListener('load', updateLogoVisibility);
+logo.addEventListener('error', updateLogoVisibility);
+updateLogoVisibility();
+
+// FIX R05: holding Enter/Space must not repeatedly activate structural actions.
+function preventRepeatedActivation(e) {
+  if (e.repeat && (e.key === 'Enter' || e.key === ' ') && e.target.closest('button')) e.preventDefault();
+}
+['tree-actions', 'wilp-body', 'btn-add-wilp'].forEach(id =>
+  document.getElementById(id).addEventListener('keydown', preventRepeatedActivation));
+
+// FIX R11: detect a changed or deleted save from another tab, including clear-all storage.
+window.addEventListener('storage', e => {
+  if (e.storageArea !== localStorage || (e.key !== STORAGE_KEY && e.key !== null)) return;
+  // FIX R11: read the current value; a delayed event may describe an already superseded save.
+  try { savedVersionMatches(); }
+  catch (error) { storageWarning('Saved progress cannot be accessed. Print or copy your work before closing.'); }
+});
+
+/* ================================================================
+   BOOT
+   ================================================================ */
+loadState();
+renderIntro();
+show('intro');
+</script>
+</body>
+</html>
