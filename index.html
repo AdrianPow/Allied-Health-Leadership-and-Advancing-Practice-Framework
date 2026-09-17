@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Allied Health Leadership and Advancing Practice Framework — Self-Assessment Tool</title>
+<!-- DRAFT NOTICE (1 of 2): remove "DRAFT — " from the title to publish. -->
+<title>DRAFT — Allied Health Leadership and Advancing Practice Framework — Self-Assessment Tool</title>
 <meta name="description" content="Interactive self-assessment tool for the Queensland Health Allied Health Leadership and Advancing Practice Framework 2022.">
 <style>
 /* ============================================================
@@ -576,6 +577,51 @@ td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-n
 </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     DRAFT NOTICE (2 of 2)
+     DELETE THIS WHOLE BLOCK — the <style> and the <p> — to publish.
+     It is deliberately self-contained: it defines its own styles, touches
+     nothing else in the file, and leaves the published layout exactly as it
+     was when removed. Nothing in the app's JavaScript refers to it.
+     ══════════════════════════════════════════════════════════════════════════ -->
+<style>
+  .draft-notice {
+    /* Sticky, so a reviewer sees the status wherever they are in a long page,
+       not only at the moment a view loads. */
+    position: sticky; top: 0; z-index: 60;
+    margin: 0;
+    background: #fdecea;
+    border-bottom: 2px solid #b3261e;
+    color: #a1180f;
+    font: 700 0.82rem/1.45 var(--font);
+    letter-spacing: .09em;
+    text-align: center;
+    padding: 7px 16px;
+  }
+  /* The one way a sticky bar could obstruct is by covering the top of whatever
+     the app scrolls to (domain tabs, the stage picker). Reserving its height as
+     scroll padding means every scrollIntoView stops clear of it. */
+  html { scroll-padding-top: 3rem; }
+  @media print {
+    /* Deliberately NOT position:fixed. A fixed box does repeat on every printed
+       page in Chrome, but it is laid out against the page *content* box, so it
+       always lands on top of the first 10pt of content — increasing the @page
+       margin moves the notice down with the content, and any negative offset
+       (top, margin-top or translate) wraps it to the foot of the page. Printing
+       it in flow keeps it prominent on page one without ever covering text; the
+       "DRAFT —" title prefix marks the remaining pages through the browser's own
+       print header. */
+    .draft-notice {
+      position: static;
+      background: #fff; color: #b3261e;
+      border-bottom: 1pt solid #b3261e;
+      font-size: 10pt; letter-spacing: .06em; padding: 0 0 3pt; margin-bottom: 6pt;
+    }
+  }
+</style>
+<p class="draft-notice">DRAFT: NOT GOVERNMENT POLICY</p>
+<!-- ═══════════════════════ END DRAFT NOTICE ═══════════════════════ -->
 
 <header class="site-header no-print">
   <div class="site-header-inner">
