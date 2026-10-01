@@ -207,6 +207,9 @@ html { scroll-behavior: smooth; }
 .intro-figure { margin: 0; }
 .intro-figure figcaption { margin-top: .75rem; text-align: center; }
 .start-block .resume-note { margin-top: 2rem; }
+/* The introduction's callout spans the full width under the text and the compass. */
+#content .intro-callout { max-width: none; margin-top: 2rem; }
+#content .ahl-section .intro-callout p { max-width: none; }
 #content .qld__page-alerts .btn-row { margin-top: 1rem; }
 
 /* Reference cards (six domains, four stages), drawn as the site's cards with the
@@ -380,7 +383,7 @@ td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: t
 .report-actions { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 0 0 3rem; }
 #content .report-actions .qld__btn { margin: 0; }
 #content .report-date { color: var(--QLD-color-light-text__muted); margin-top: .5rem; }
-.domain-dot { display: inline-block; width: .75rem; height: .75rem; border-radius: 50%; margin-right: .5rem; vertical-align: baseline; }
+.domain-dot { display: inline-block; width: .75rem; height: .75rem; border-radius: 50%; margin-right: .5rem; vertical-align: baseline; background: var(--domain-color); }
 .domain-label { display: flex; align-items: baseline; gap: .5rem; } /* FIX R21 */
 .domain-label > .domain-dot { margin-right: 0; flex-shrink: 0; }
 .domain-label > span { min-width: 0; }
@@ -388,6 +391,8 @@ td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: t
 .compass-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; font-size: .875rem; color: var(--QLD-color-light-text__muted); margin-top: .75rem; }
 .compass-legend span { display: inline-flex; align-items: center; gap: .5rem; }
 .legend-swatch { width: 1.5rem; height: .625rem; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+.legend-you { background: rgba(5,17,128,.35); border: 1.5px solid #051180; }
+.legend-max { background: transparent; border: 1.5px dashed #8a93b8; }
 #progression-note { margin-top: 1rem; }
 
 /* Domain feedback: the site's card, with the domain colour as the left rule */
@@ -436,6 +441,34 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
 /* With the site menu left out, the design-accent rule that sits under the menu bar on
    the website closes off the masthead instead. */
 .qld__header__main { border-bottom: 4px solid var(--QLD-color-light-designAccent); }
+
+/* Between 699px and 991px the website shows only the last two crumbs (nth-last-child),
+   which can be the tool's hidden crumbs on the introduction; show the visible pair. */
+.qld__breadcrumbs__list--desktop > li:has(+ #crumb-tool:not([hidden])),
+.qld__breadcrumbs__list--desktop > #crumb-tool:not([hidden]) { display: inline-block; }
+
+/* Phones: the notes table and the learning plan become one stacked block per row
+   (labels from data-label), so nothing needs sideways scrolling. */
+@media screen and (max-width: 639.98px) {
+  .notes-table thead, .wilp-table thead { display: none; }
+  .notes-table, .notes-table tbody, .notes-table tr, .notes-table td,
+  .wilp-table, .wilp-table tbody, .wilp-table tr, .wilp-table td { display: block; width: 100% !important; }
+  .notes-table tr, .wilp-table tr { position: relative; border-bottom: 1px solid var(--QLD-color-light-border); padding: .75rem 0; }
+  #content .notes-table td, #content .wilp-table td { border: 0; padding: .25rem 0; }
+  .notes-table td[data-label]::before, .wilp-table td[data-label]::before {
+    content: attr(data-label); display: block; font-size: .875rem; font-weight: 600; color: var(--QLD-color-light-heading); margin-bottom: .25rem;
+  }
+  .wilp-table { min-width: 0 !important; table-layout: auto !important; }
+  #content .wilp-table td.wilp-done { display: flex; align-items: center; gap: 1rem; text-align: left; }
+  #content .wilp-table td.wilp-done::before { margin: 0; }
+  #content .wilp-done .qld__control-input { margin: 0; }
+  #content .wilp-table td.no-print { position: absolute; top: .25rem; right: 0; width: auto !important; padding: 0; }
+  .wilp-table tr > td:first-child { padding-right: 3rem !important; }
+  /* Domain tabs as an even two-column grid */
+  .domain-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem; border-bottom: 0; }
+  .domain-tab.qld__tab-button, .domain-tab.qld__tab-button.active { margin: 0; border: 1px solid transparent; border-radius: 4px; }
+  .domain-tab.qld__tab-button.active { border-color: var(--QLD-color-light-alt-border); }
+}
 
 /* ------------------------------------------------------------------- toast */
 .toast {
@@ -498,6 +531,22 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
 /* ------------------------------------------------------------------- print */
 @page { size: A4; margin: 14mm 12mm; }
 @media print {
+  /* The website's print rules turn every colour black (.qld__body * { color: #000 !important;
+     background-color: transparent !important; border-color: #000 !important }). The report
+     brings back the colours that carry meaning: the six domain colours, the score bands, the
+     focus-area tag and the compass legend. */
+  #content .domain-dot { background-color: var(--domain-color) !important; }
+  #content .feedback-card { border-color: #bbb !important; border-left-color: var(--domain-color) !important; }
+  #content .feedback-card h3 > span:first-child { color: var(--QLD-color-light-heading) !important; }
+  #content .qld__tag.tier-low  { background-color: var(--ahl-error-bg) !important;   border-color: var(--ahl-error) !important; }
+  #content .qld__tag.tier-mid  { background-color: var(--ahl-caution-bg) !important; border-color: var(--ahl-caution) !important; }
+  #content .qld__tag.tier-high { background-color: var(--ahl-success-bg) !important; border-color: var(--ahl-success) !important; }
+  #content .qld__tag.tag-focus { background-color: var(--ahl-info-strong) !important; border-color: var(--ahl-info-strong) !important; color: #fff !important; }
+  #content .legend-you { background-color: rgba(5,17,128,.35) !important; border-color: #051180 !important; }
+  #content .legend-max { border-color: #8a93b8 !important; }
+  #content .fb-next { background-color: var(--QLD-color-light-background__shade) !important; border-left-color: var(--QLD-color-light-designAccent) !important; }
+  #content .qld__callout { background-color: var(--QLD-color-light-background__shade) !important; border-color: var(--QLD-color-light-background__shade) !important; border-left-color: var(--QLD-color-light-designAccent) !important; }
+
   body { background: #fff; font-size: 10.5pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print, .qld__header, .qld__main-nav, .qld__body--breadcrumb, .qld__side-nav, .qld__footer, .qld__widgets,
   .last-updated, .domain-tabs, .progress, .progress-row, .toast, .save-flash, .scale-key { display: none !important; }
@@ -795,7 +844,6 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
      ========================================================== -->
 <section id="view-intro" class="view" aria-label="Introduction and instructions">
 
-  <p class="qld__abstract">Self-assessment tool</p>
 
   <div class="ahl-section">
     <div class="split">
@@ -808,7 +856,7 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
         It describes how allied health professionals progressively expand their <em>sphere of influence</em> —
         from leading themselves, to leading others, to leading innovations, to leading systems.</p>
 
-        <p>This tool walks you through the framework's assessment process:</p>
+        <p>This self-assessment tool walks you through the framework's assessment process:</p>
         <!-- FIX R17: separate titles from descriptions instead of wrapping a long combined line. -->
         <ol class="intro-steps">
           <li><strong>Framework Assessment Tree</strong><span class="step-description">A few short questions to identify which stage you are working within.</span></li>
@@ -818,18 +866,6 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
           <li><strong>Work-Integrated Learning Plan</strong><span class="step-description">Record the development activities you will pursue.</span></li>
         </ol>
 
-        <!-- Health design system callout -->
-        <div class="qld__callout">
-          <h3 class="qld__callout__heading">Scores are not performance indicators</h3>
-          <p>This is a reflective tool to help you and your supervisor identify strengths and target areas for
-          development.</p>
-          <p class="hint">Your answers stay in this browser — the app does not transmit your answers, notes or learning plan.
-          <!-- FIX R10: explain the persistence and access boundary of local storage. -->
-          Progress is saved on this browser profile until you discard it or clear browser data.
-          Other people using the same profile may be able to access it.
-          The typeface loads from Google Fonts when available; that request contains none of your answers.
-          Opening a source link leaves this app.</p>
-        </div>
       </div>
       <figure class="intro-figure">
         <div id="compass-intro-holder"></div>
@@ -837,6 +873,13 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
           The Capability Compass: six domains (outer ring) across four stages of expanding influence (inner circles).
         </figcaption>
       </figure>
+    </div>
+    <!-- Health design system callout, spanning both columns -->
+    <div class="qld__callout intro-callout">
+      <h3 class="qld__callout__heading">Scores are not performance indicators</h3>
+      <p>This is a reflective tool to help you and your supervisor identify strengths and target areas for
+      development.</p>
+      <p class="hint">Your answers stay in this browser — the app does not transmit your answers, notes or learning plan.</p>
     </div>
   </div>
 
@@ -971,8 +1014,8 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
       <div>
         <div class="compass-wrap" id="compass-report-holder"></div>
         <div class="compass-legend">
-          <span><i class="legend-swatch" style="background:rgba(5,17,128,.35);border:1.5px solid #051180"></i> Your current capability</span>
-          <span><i class="legend-swatch" style="background:transparent;border:1.5px dashed #8a93b8"></i> A score of 5 in every domain</span>
+          <span><i class="legend-swatch legend-you"></i> Your current capability</span>
+          <span><i class="legend-swatch legend-max"></i> A score of 5 in every domain</span>
         </div>
       </div>
       <div>
@@ -1049,7 +1092,7 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
         <div class="row qld__footer__row">
             <div class="col-xs-12 qld__footer__column">
                 <div class="qld__footer__title">
-                    <h4 class="qld__footer__heading">Queensland Health</h4>
+                    <h2 class="qld__footer__heading">Queensland Health</h2>
                 </div>
             </div>
         </div>
@@ -1061,7 +1104,7 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
                 <div class="container-fluid">
                     <div class="row ">
                         <div class="col-xs-12 col-sm-8 col-lg-12">
-                            <h4 class="qld__footer__heading">Contact us</h4> 
+                            <h3 class="qld__footer__heading">Contact us</h3> 
                             <p class="qld__footer__cta-content">
                                 Get in touch for enquiries, feedback or complaints and compliments.
                             </p>
@@ -1074,8 +1117,8 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
             </div>
             
             <div class="col-xs-12 col-lg-2 qld__footer__column">
-                <nav class="qld__footer__navigation" aria-label="footer">
-                    <h4 class="qld__footer__heading">Key links</h4>
+                <nav class="qld__footer__navigation" aria-label="Key links">
+                    <h3 class="qld__footer__heading">Key links</h3>
                     <ul class="qld__link-list">
                         <li>
                             <a class="qld__footer__clickable__link" href="https://www.health.qld.gov.au/clinical-practice/guidelines-procedures">Clinical guidelines</a>
@@ -1106,7 +1149,7 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
             </div>
             
             <div class="col-xs-12 col-lg-2 qld__footer__column">
-                <nav class="qld__footer__navigation" aria-label="footer">
+                <nav class="qld__footer__navigation" aria-label="Website information">
                     <ul class="qld__link-list">
                         <li>
                             <a class="qld__footer__clickable__link" href="https://www.health.qld.gov.au/global/copyright-statement">Copyright</a>
@@ -1146,7 +1189,7 @@ main.content-page #content.ahl-content > * { padding-left: 0; padding-right: 0; 
 
             <div class="col-xs-12 col-lg-2 qld__footer__column">
                 <nav class="qld__footer__social" aria-label="social media links">
-                    <h4 class="qld__footer__heading">Follow us</h4>
+                    <h3 class="qld__footer__heading">Follow us</h3>
                     <ul class="qld__link-list">
                         <li>
                             <a class="qld__footer__clickable__link" href="https://www.facebook.com/QLDHealth">
@@ -2424,7 +2467,7 @@ function renderReport() {
     const partial = n > 0 && n < len
       ? ` <small class="hint">(${n}/${len} answered)</small>` : '';
     return `<tr>
-      <td><span class="domain-label"><span class="domain-dot" style="background:${d.color}"></span><span>${esc(d.title)}${partial}</span></span></td>
+      <td><span class="domain-label"><span class="domain-dot" style="--domain-color:${d.color}"></span><span>${esc(d.title)}${partial}</span></span></td>
       <td class="num">${avg === null ? '&mdash;' : avg.toFixed(1) + ' / 5'}</td>
       <td><span class="qld__tag tier-badge ${band.css}">${band.label}</span></td>
     </tr>`;
@@ -2459,6 +2502,9 @@ function isUneven(averages) {
   return min <= CONFIG.band.highAbove && (max - min) >= CONFIG.focus.minSpread;
 }
 
+// "A, B and C": a list read as a sentence.
+const joinAnd = (items, sep, last) => items.length < 2 ? items.join('') : items.slice(0, -1).join(sep) + last + items[items.length - 1];
+
 function renderSupervisorSection(averages, stage, priority) {
   const scored = DOMAINS.filter(d => averages[d.id] !== null);
   const strongest = scored.slice().sort((a, b) => averages[b.id] - averages[a.id])[0];
@@ -2472,7 +2518,7 @@ function renderSupervisorSection(averages, stage, priority) {
   if (priority.length) {
     lines.push('The domain' + (priority.length === 1 ? '' : 's') + ' to focus on first ' +
       (priority.length === 1 ? 'is' : 'are') + ' <strong>' +
-      priority.map(d => esc(d.title)).join('</strong>, <strong>') + '</strong>.');
+      joinAnd(priority.map(d => esc(d.title)), '</strong>, <strong>', '</strong> and <strong>') + '</strong>.');
   } else if (scored.length && scored.every(d => averages[d.id] > CONFIG.band.highAbove)) { // FIX M1
     // FIX R09: respect the configured threshold and avoid next-stage advice at the final stage.
     lines.push('You rated yourself above ' + CONFIG.band.highAbove + ' in every domain you answered. ' +
@@ -2502,14 +2548,14 @@ function renderSupervisorSection(averages, stage, priority) {
       const key = qKey(d.id, i);
       if (!state.notes[key]) return;
       rows.push(`<tr>
-        <td style="white-space:nowrap"><span class="domain-dot" style="background:${d.color}"></span><strong>${d.num}.${i + 1}</strong></td>
-        <td>${esc(text)}</td>
+        <td class="notes-item"><span class="domain-dot" style="--domain-color:${d.color}"></span><strong>${d.num}.${i + 1}</strong></td>
+        <td data-label="Statement">${esc(text)}</td>
         <!-- FIX R12: render escaped notes with their original line breaks. -->
-        <td class="note-summary-text">${esc(state.notes[key])}</td>
+        <td class="note-summary-text" data-label="Your note">${esc(state.notes[key])}</td>
       </tr>`);
     });
   });
-  holder.innerHTML = `<div class="table-wrap"><table class="qld__table">
+  holder.innerHTML = `<div class="table-wrap"><table class="qld__table notes-table">
     <thead><tr><th scope="col" style="width:6rem">Item</th><th scope="col" style="width:40%">Statement</th><th scope="col">Your note</th></tr></thead>
     <tbody>${rows.join('')}</tbody></table></div>`;
 }
@@ -2597,14 +2643,14 @@ function renderWilp() {
     const r = 'row ' + (i + 1);
     return `
     <tr>
-      <td><textarea class="qld__text-input" data-wilp="need" data-i="${i}" rows="2" placeholder="e.g. Criteria 1.1, 1.2, 1.3"
+      <td data-label="Identified development need"><textarea class="qld__text-input" data-wilp="need" data-i="${i}" rows="2" placeholder="e.g. Criteria 1.1, 1.2, 1.3"
           aria-label="Identified development need, ${r}">${esc(row.need)}</textarea><div class="print-text">${esc(row.need)}</div></td>
       <!-- FIX R01: escaped, domain-specific prompt leaves the user's activity value unchanged. -->
-      <td><textarea class="qld__text-input" data-wilp="activities" data-i="${i}" rows="2" placeholder="${esc(activityPlaceholder(row.need))}"
+      <td data-label="Potential activities"><textarea class="qld__text-input" data-wilp="activities" data-i="${i}" rows="2" placeholder="${esc(activityPlaceholder(row.need))}"
           aria-label="Potential activities, ${r}">${esc(row.activities)}</textarea><div class="print-text">${esc(row.activities)}</div></td>
-      <td class="wilp-done"><div class="qld__control-input"><input type="checkbox" id="wilp-done-${i}" data-wilp="done" data-i="${i}" ${row.done ? 'checked' : ''}
-          aria-label="Activity completed, ${r}"><label class="qld__control-input__text" for="wilp-done-${i}"><span class="visually-hidden">Activity completed, ${r}</span></label></div><span class="print-done">${row.done ? 'Done' : 'Not yet'}</span></td>
-      <td><textarea class="qld__text-input" data-wilp="reflection" data-i="${i}" rows="2" placeholder="Reflection"
+      <td class="wilp-done" data-label="Done?"><div class="qld__control-input"><input type="checkbox" id="wilp-done-${i}" data-wilp="done" data-i="${i}" ${row.done ? 'checked' : ''}
+          ><label class="qld__control-input__text" for="wilp-done-${i}"><span class="visually-hidden">Activity completed, ${r}</span></label></div><span class="print-done">${row.done ? 'Done' : 'Not yet'}</span></td>
+      <td data-label="Has this activity helped? How?"><textarea class="qld__text-input" data-wilp="reflection" data-i="${i}" rows="2" placeholder="Reflection"
           aria-label="Has this activity helped you meet the development objective, ${r}">${esc(row.reflection)}</textarea><div class="print-text">${esc(row.reflection)}</div></td>
       <td class="no-print"><button type="button" class="wilp-del" data-del="${i}"
           aria-label="Remove ${r}">&times;</button></td>
